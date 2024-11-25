@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -71,4 +73,23 @@
 
 body {
   @apply overflow-hidden;
+}
+.count-not {
+font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+
+.nav-item:hover img{
+  filter: brightness(0) saturate(100%) invert(34%) sepia(91%) saturate(4269%) hue-rotate(236deg) brightness(89%) contrast(103%);
+} 
+
+
+
+.list-switcher:hover img {
+  filter:brightness(0) saturate(100%) invert(30%) sepia(77%) saturate(6224%) hue-rotate(241deg) brightness(93%) contrast(92%);
+}
+
+
+.template-btn:hover img{
+filter:invert(1) brightness(100%);
 }

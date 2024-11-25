@@ -29,7 +29,7 @@ const SamplingSection = ({color}) => {
             </div>
 
             {/* Cards */}
-            <div className="flex space-x-4 mb-[15px]">
+            <div className="flex space-x-4  ">
                 {cardsData.map((card, index) => (
                     <ReviewCard
                         key={index}

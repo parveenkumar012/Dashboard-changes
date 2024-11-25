@@ -56,7 +56,7 @@ export function Sidebar() {
     const [isProductExpanded, setIsProductExpanded] = useState(false);
 
     return (
-        <div className="w-[228px] shrink-0 sticky left-0 top-0 max-h-[calc(100vh-170px)] overflow-y-auto ">
+        <div className="w-[228px] shrink-0">
           {/* Header */}
           <div className="flex flex-col justify-end items-baseline flex-wrap h-[199px] border-b-[1px] pb-[20px] sticky top-0 z-10 bg-white ps-[24px]">
             <h3 className="text-base font-semibold w-full flex items-end gap-x-[5px]">

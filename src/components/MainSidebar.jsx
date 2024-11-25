@@ -3,7 +3,7 @@ import { Home, RefreshCcw, Box, Link, Share2, Grid, FileText, Settings, HelpCirc
 
 const MainSidebar = () => {
     return (
-        <div className="h-screen bg-gray-900 w-[86px] text-white flex flex-col items-center py-4 space-y-6 fixed left-0 top-0">
+        <div className="h-screen bg-gray-900 w-[50px] md:w-[86px] text-white flex flex-col items-center py-4 space-y-0 md:space-y-6 fixed left-0 top-0">
             {/* Icons */}
             <button className="hover:bg-gray-700 p-2 rounded">
                 <Home size={24} />
