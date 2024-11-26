@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState} from "react";
 // import { Badge, Card, CardHeader, CardContent, CardFooter } from "@shadcn/ui";
 import { CheckCircle, Clock, AlertTriangle, Calendar, Paperclip, CircleCheck, MessagesSquare } from "lucide-react"; // Using Lucide icons for similar icons
 import {
@@ -10,7 +10,10 @@ import {
   import { Badge } from "@/components/ui/badge"
 import Tooltip from "../components/ToolTip";
 import Dropdown from '../components/Dropdown';
-export function TaskCard({ title, status, startDate, endDate, applicableCards, metrics , isExpand }) {
+import { Button } from "./ui/button";
+import { Link } from 'react-router-dom';
+export function TaskCard({ title, status, startDate, endDate, applicableCards, metrics , isExpand,product }) {
+  const [viewPdf,setViewPdf] = useState(null);
   const statusStyles = {
     OVERDUE: "bg-[#FFF0F8] text-[#C11574] hover:bg-[#FFF0F8]",
     PENDING: "bg-[#FFF9EC] hover:bg-[#FFF9EC] text-[#F0AF1D]",
@@ -87,7 +90,13 @@ export function TaskCard({ title, status, startDate, endDate, applicableCards, m
                  </Dropdown>
                 </Badge>
               </div>
+              {(product == '1') && (
+                <div>
+                    <Link to="/pdf-viewer">View Pdf</Link>
+                </div>
+              )}
             </div>
+          
           )}
           {(isExpand==true) && (
              <div className="border-[#DADADA] border-t-[1px] pt-[10px] mt-[10px]">

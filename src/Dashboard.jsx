@@ -234,9 +234,6 @@ import { ChevronDown,ChevronUp } from "lucide-react"; // Arrow icon from lucide-
           </div>
             {products.map((product) => (
           <div className="flex border-b-[1px] bg-white w-[1920px]  lg:w-[calc(100%+122.9%)] xl:w-[calc(100%+335px)]">
-            {
-                console.log(product)
-            }
              <div className="sticky left-0 z-20  w-full max-w-[116px] min-w-[116px] md:max-w-[175px] md:min-w-[175px] lg:max-w-[227px] pl-3 lg:pl-6 lg:min-w-[227px] pr-[13px] bg-white pt-4 pb-5" ><Card key={product.id} className=" pl-24 flex items-center flex-wrap  px-0 relative shadow-none rounded-none border-x-0 border-t-0  border-b-[0px]">
                 {/* Product Image */}
                 <div className="w-full">
@@ -265,8 +262,7 @@ import { ChevronDown,ChevronUp } from "lucide-react"; // Arrow icon from lucide-
               </div>
           
         <div className="bg-white w-full items-start  min-w-[932px] pr-[12px] lg:pr-[25px] grid grid-cols-3 space-x-4 pt-4 pb-5">
-                
-                    <TaskCard status="OVERDUE" isExpand={product.isExpand}/>
+                    <TaskCard status="OVERDUE" isExpand={product.isExpand} product={product.id}/>
                     <TaskCard status="DONE"  isExpand={product.isExpand}/>
                     <TaskCard  isExpand={product.isExpand}/>
                

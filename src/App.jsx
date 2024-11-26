@@ -5,6 +5,7 @@ import './App.css'
 import Dashboard from './Dashboard';
 import SupplierOnBoard from './supplier/onboard.jsx';
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from "react-router-dom";
+import PdfViewer  from './components/PdfViewer';
 
 function App() {
   const router = createBrowserRouter(
@@ -12,6 +13,7 @@ function App() {
       <Route path="/">
         <Route path="/" element={<Dashboard />} />
         <Route path="/supplier-onboarding" element={<SupplierOnBoard />} />
+        <Route path="/pdf-viewer" element={<PdfViewer />} />
       </Route>
     )
   );
