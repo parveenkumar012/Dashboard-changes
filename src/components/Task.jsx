@@ -92,7 +92,7 @@ export function TaskCard({ title, status, startDate, endDate, applicableCards, m
               </div>
               {(product == '1') && (
                 <div>
-                    <Link to="/pdf-viewer">View Pdf</Link>
+                    <Link to="/pdf-view">View Pdf</Link>
                 </div>
               )}
             </div>
