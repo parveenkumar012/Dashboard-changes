@@ -262,7 +262,7 @@ import { ChevronDown,ChevronUp } from "lucide-react"; // Arrow icon from lucide-
               </div>
           
         <div className="bg-white w-full items-start  min-w-[932px] pr-[12px] lg:pr-[25px] grid grid-cols-3 space-x-4 pt-4 pb-5">
-                    <TaskCard status="OVERDUE" isExpand={product.isExpand} product={product.id}/>
+                    <TaskCard status="OVERDUE" isExpand={product.isExpand}/>
                     <TaskCard status="DONE"  isExpand={product.isExpand}/>
                     <TaskCard  isExpand={product.isExpand}/>
                

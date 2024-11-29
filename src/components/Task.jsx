@@ -90,11 +90,11 @@ export function TaskCard({ title, status, startDate, endDate, applicableCards, m
                  </Dropdown>
                 </Badge>
               </div>
-              {(product == '1') && (
+              {/* {(product == '1') && (
                 <div>
                     <Link to="/pdf-view">View Pdf</Link>
                 </div>
-              )}
+              )} */}
             </div>
           
           )}
