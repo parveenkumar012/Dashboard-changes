@@ -110,3 +110,152 @@ filter:invert(1) brightness(100%);
   top: 0px;
   font-size: 13px;
 }
+.rpv-core__annotation-text-icon .rpv-core__icon {
+  display: none;
+}
+
+
+/* tolltip card css */
+.card_main .top_row {
+  display: flex;
+  justify-content: space-between;
+}
+.card_main .top_row p {
+  font-size: 10px;
+  font-style: italic;
+}
+.card_main .top_row h3 {
+  font-size: 12px;
+  display: flex;
+  gap: 10px;
+}
+.custom-tooltip {
+  border: 1px solid #5a5a5a30;
+  box-shadow: 0 0 20px #97979714;
+}
+.card_main .top_row h3 span {
+  width: 25px;
+  height: 25px;
+  background: #0000ff85;
+  color: #fff;
+  border-radius: 50px;
+  display: inline-block;
+  line-height: 1.2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10px;
+}
+.card_main > p {
+  font-size: 12px;
+  padding: 17px 0 10px;
+}
+.card_main p {
+  color: #000;
+}
+.card_main .footer_row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.card_main >.footer_row {
+  border-top: 1px solid #ddd;
+  width: calc(100% + 26px);
+  margin-left: -13px;
+  padding: 10px 13px;
+}
+
+.card_main .footer_row .reply p {
+  background-color: #ddd;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 50px;
+}
+.card_main .footer_row img {
+  width: 20px;
+}
+
+.show_hide_div .inner> p {
+  font-size: 10px;
+  padding: 10px 0 30px;
+}
+.show_hide_div .inner {
+  border-left: 1px solid #444;
+  padding-left: 20px;
+}
+.show_hide_div {
+  padding-top: 10px;
+}
+.attach_file .attach-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #444;
+  cursor: pointer;
+}
+.attach_file .attach-wrap p {
+  color: #444;
+  font-size: 10px;
+  font-style: italic;
+}
+.attach_file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.attach_file .attach-wrap input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 10;
+}
+.attach_file button {
+  font-size: 9px;
+  font-weight: 700;
+  background: #0000ff85;
+  color: #fff;
+  padding: 5px 5px;
+  border-radius: 4px;
+}
+.show_hide_div form {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-top: 30px;
+}
+.show_hide_div form textarea {
+    resize: none;
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+    background: transparent;
+    padding: 6px 10px;
+    height: 46px;
+    outline: none;
+}
+  .show_hide_div form .attach_file {
+    padding: 6px 10px;
+}
+.attach-wrap{
+  background-color: #d4d4d454;
+  padding: 6px 10px;
+  border-radius: 50px;
+}
+.custom-tooltip {
+  min-width: 334px;
+  max-width: 334px;
+}
+select.custom-select-box {
+  background: url(http://localhost:5173/src/assets/drop_icon.png);
+  background-repeat: no-repeat;
+  background-size: 8px;
+  background-color: #fff;
+  background-position: 90% 55%;
+  padding-right: 30px;
+}
+span.messageText {
+  color: #0E00FF;
+}

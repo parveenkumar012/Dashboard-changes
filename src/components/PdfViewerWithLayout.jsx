@@ -23,8 +23,14 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
-import { FilterIcon, SearchCheckIcon, SearchIcon, SortDesc, SortDescIcon } from 'lucide-react';
-import MessageIcon from "../assets/message.png";
+import { FilterIcon, SearchCheckIcon, SearchIcon} from 'lucide-react';
+import MessageIcon from "../assets/message-image.png";
+import { format, formatDistance, formatRelative, subDays,formatDistanceToNow } from 'date-fns'
+import { LuUserPlus } from "react-icons/lu";
+import ProductImage from "../assets/product_watch.jpeg";
+import { BiLike } from "react-icons/bi";
+import { RxExit } from "react-icons/rx";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 const PdfViewerWithLayout = () => {
     const defaultLayout = defaultLayoutPlugin();
@@ -39,6 +45,7 @@ const PdfViewerWithLayout = () => {
     const [currentPageIndex, setCurrentPageIndex] = useState(0);
     const [hoveredAnnotation, setHoveredAnnotation] = useState(null);
     const [annotationPositions, setAnnotationPositions] = useState([]);
+    const [initialPage,setInitialPage] = useState(0);
     const viewerRef = useRef(null);
 
     const handlePdfClick = (e) => {
@@ -69,36 +76,36 @@ const PdfViewerWithLayout = () => {
     // Save annotation (icon) and position when user submits it
     const saveAnnotation = async () => {
         if (newComment.trim()) {
-            setAnnotations([
-                ...annotations,
-                { x: clickPosition.x, y: clickPosition.y, comment: newComment, pageIndex: currentPageIndex }
-            ]);
+            let updatedAnnotations;
+
+            setAnnotations(prevAnnotations => {
+                updatedAnnotations = [...prevAnnotations,{ x: clickPosition.x, y: clickPosition.y, comment: newComment, pageIndex: currentPageIndex }];
+                return updatedAnnotations;
+            });
+
             setNewComment(''); // Clear the input after saving
             setShowInput(false); // Hide the input box
-            // setInterval(async () =>{
-            //     await saveAnnotationsToPdf();
-            // }, 500);
+            await saveAnnotationsToPdf(updatedAnnotations);
         }
     };
 
-    const saveAnnotationsToPdf = async () => {
+    const saveAnnotationsToPdf = async (annotations) => {
         const pdfBytes = await fetch(pdfUrl).then((res) => res.arrayBuffer());
         const pdfDoc = await PDFDocument.load(pdfBytes);
-
+        
         const logoImageBytes = await fetch(logoImage).then((res) => res.arrayBuffer());
         const logo = await pdfDoc.embedPng(logoImageBytes);
         const logoDims = logo.scale(0.05); // Scale the logo
-
-        annotations.forEach((annotation) => {
+        annotations.forEach((annotation,key) => {
             if (!annotation.timestamp) {
                 // Add timestamp when saving the annotation
                 const timestamp = new Date().toLocaleString(); // You can customize the format if needed
                 annotation.timestamp = timestamp;
                 const page = pdfDoc.getPages()[annotation.pageIndex || 0]; // Get the page for annotation
-
+        
                 const scaledX = annotation.x * scale;
                 const scaledY = page.getHeight() - (annotation.y * scale); // Adjust Y for PDF coordinates
-
+        
                 // Create the popup annotation (tooltip)
                 const popupAnnotation = PDFDict.withContext(pdfDoc.context);
                 popupAnnotation.set(PDFName.of('Type'), PDFName.of('Annot'));
@@ -108,46 +115,23 @@ const PdfViewerWithLayout = () => {
                 ]));
                 popupAnnotation.set(PDFName.of('Contents'), PDFString.of(`${annotation.timestamp}\n${annotation.comment}`)); // Tooltip text with timestamp
                 popupAnnotation.set(PDFName.of('Name'), PDFName.of('Comment')); // Annotation name
-
+        
                 const annots = page.node.get(PDFName.of('Annots')) || pdfDoc.context.obj([]);
                 annots.push(popupAnnotation);
                 page.node.set(PDFName.of('Annots'), annots);
             }
         });
-
+        
         const modifiedPdfBytes = await pdfDoc.save();
         const modifiedPdfUrl = URL.createObjectURL(new Blob([modifiedPdfBytes], { type: 'application/pdf' }));
-
+        
         // Update the PDF URL with annotations
         setPdfUrl(modifiedPdfUrl);
-        setInterval(async () => {
-            await addTooltipsToAnnotations();
-        }, 500);
-    };
-
-    const handleScroll = () => {
-        if (viewerRef.current) {
-            const viewer = viewerRef.current;
-            const pages = viewer.querySelectorAll('.rpv-core__text-layer');
-            let pageIndex = 0;
-
-            // Loop through the pages and check which one is in view
-            pages.forEach((page, index) => {
-                const rect = page.getBoundingClientRect();
-                if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
-                    pageIndex = index;
-                }
-            });
-
-            // Update the current page index
-            setCurrentPageIndex(pageIndex);
-        }
     };
 
     const clickComment = async (index) => {
         setReadyForReply(index);
         setAnnotations(() => annotations);
-
     }
 
     const addReply = (index) => {
@@ -165,181 +149,290 @@ const PdfViewerWithLayout = () => {
             setCurrentReply('');
         }
     }
+
     // Function to insert custom tooltips in the annotations
     const addTooltipsToAnnotations = async () => {
-        const annotationIcons = document.querySelectorAll('.rpv-core__annotation-text-icon');
-        // console.log(annotationIcons);
+        const annotationIcons = document.querySelectorAll('.rpv-core__annotation-layer');
+        var count = 0;
         annotationIcons.forEach((iconContainer, index) => {
-            const annotation = annotations[index]; // Assuming annotations are in order
-            if (annotation) {
-                const existingTooltip = iconContainer.querySelector('.custom-tooltip');
-                if (existingTooltip) {
-                    // Tooltip already exists, no need to create a new one
-                    return;
-                }
-                iconContainer.innerHTML = `<div class="msgIconContainer" data-id="${index+1}"><span class="messageText">${index+1}</span><img src="${MessageIcon}" class="message_icon" alt="Message" /></div>`;
 
-                // Create a custom tooltip and append it to the annotation icon
-                const tooltip = document.createElement('div');
-                tooltip.style.position = 'absolute';
-                tooltip.style.top = '-1px';
-                tooltip.style.right = '25px';
-                tooltip.style.padding = '5px';
-                tooltip.style.backgroundColor = 'white';
-                tooltip.style.color = 'black';
-                tooltip.style.fontSize = '12px';
-                tooltip.style.borderRadius = '3px';
-                tooltip.style.zIndex = '1000';
-                tooltip.style.display = 'none';
-                tooltip.innerText = `Added on: ${annotation.timestamp}\n${annotation.comment}`;
-                tooltip.classList.add('custom-tooltip');
-                // Append the tooltip to the annotation icon
-                iconContainer.appendChild(tooltip);
+            const dataTestId = iconContainer.getAttribute('data-testid');
+            const dataId = dataTestId.charAt(dataTestId.length - 1);
+            const filteredAnnotations = annotations
+            .map((annotation, index) => ({ ...annotation, originalIndex: index }))  // Add the original index to each annotation
+            .filter(annotation => annotation.pageIndex == dataId);  // Filter by pageIndex
 
-                // Hide tooltip on mouse out
-                iconContainer.addEventListener('mouseleave', () => {
-                    tooltip.style.display = 'none';
-                });
+            filteredAnnotations.forEach((annotation, mainIndex) => {
+                    const annotationElements = iconContainer.querySelectorAll('.rpv-core__annotation');
+                    const annotationElement = annotationElements[mainIndex];
+                    // console.log(annotationElement);
+                    const annotationCon = annotationElement.querySelector('.rpv-core__annotation-text-icon');
+                    const existingTooltip = annotationCon.querySelector('.custom-tooltip');
+                    if (existingTooltip) {
+                        // Tooltip already exists, no need to create a new one
+                        return;
+                    }
+                    const annotationNumber = parseInt(annotation.originalIndex, 10) + 1;
+                
+                    // Append the tooltip to the annotation icon
+                    const tooltip = `<div class="custom-tooltip" style="position: absolute;top: -1px;right: 25px;padding: 5px;background-color: white;color: black;font-size: 12px;border-radius: 3px;z-index: 1000;display: none;">
+                    <div class="inner_wraper">
+                        <div class="card_main">
+                            <div class="top_row">
+                                <h3><span>PM</span>Product Managar</h3>
+                                <p>5 month ago</p>
+                            </div>
+                            <p>${annotation?.comment}</p>
+                            <div class="footer_row">
+                                <div class="cooment">
+                                    <img src="src/assets/Frame 1000003152.png" alt="">
+                                </div>
+                                <div class="reply">
+                                    <p>0 reply</p>
+                                </div>
+                            </div>
+                            <div class="show_hide_div">
+                                <div class="inner">
+                                <div class="top_row">
+                                    <h3><span>PM</span>Product Managar</h3>
+                                    <p>5 month ago</p>
+                                </div>
+                                <p>See attached</p>
+                                <div class="footer_row">
+                                    <div class="cooment">
+                                        <img src="src/assets/Frame 1000003152.png" alt="">
+                                    </div>
+                                </div>
+                            </div>
+                                <form action="">
+                                    <textarea name="" id=""></textarea>
+                                    <div class="attach_file">
+                                        <div class="attach-wrap">
+                                            <i class="fa fa-paperclip" aria-hidden="true"></i>
+                                            <p>Attach files</p>
+                                            <input type="file" id="myFile" name="filename">
+                                        </div>
+                                        <button type="button">Add Comment</button>
+                                        
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    </div>`;
 
-                // Show tooltip on mouse hover
-                iconContainer.addEventListener('mouseenter', () => {
-                    tooltip.style.display = 'block';
-                });
-            }
+                    annotationCon.innerHTML = `<div class="msgIconContainer" data-id="${annotationNumber}"><span class="messageText" data-id="${annotationNumber}">${annotationNumber}</span><img src="${MessageIcon}" class="message_icon" alt="Message" data-id="${annotationNumber}" /></div>${tooltip}`;
+
+                    // Hide tooltip on mouse out
+                    annotationCon.addEventListener('mouseleave', () => {
+                        const tooltip = annotationCon.querySelector('.custom-tooltip');
+                        tooltip.style.display = 'none'; // Add your desired style
+                    });
+    
+                    // Show tooltip on mouse hover
+                    annotationCon.addEventListener('mouseenter', () => {
+                        const tooltip = annotationCon.querySelector('.custom-tooltip');
+                        tooltip.style.display = 'block'; // Add your desired style
+                    });
+            });
         });
     };
-    
+        
+    const handleCommentClick = (key) => {
+        const annotation = annotations[key];
+        const inputElement = document.querySelector('.rpv-core__textbox[data-testid="page-navigation__current-page-input"]');
+        if (inputElement) {
+            console.log(annotation.pageIndex+1);
+            inputElement.value = annotation.pageIndex; // Set the value to the desired page number
+        }
+
+    }
+    const formatDate = (dateString) => {
+        console.log(dateString);
+        const inputDate = new Date(dateString);
+        return `${formatDistanceToNow(inputDate)} ago`;
+    }
+
     // rpv-core__annotation-text-icon
-    useEffect(() => {
-        const elements = document.querySelectorAll('.msgIconContainer');
-
+    useEffect(() => {       
         const handleClick = (event) => {
-            const container = event.currentTarget;
-            const dataId = container.dataset.id;
-            console.log(dataId);
+            if (event.target && (event.target.matches('.message_icon') || event.target.matches('.messageText'))) {
+                const dataId = event.target.dataset.id;
+                setReadyForReply(dataId-1);
+            }
         };
+        document.body.addEventListener('click', handleClick);
 
-        // Add event listener to each element with the class
-        elements.forEach((el) => {
-            el.addEventListener('click', handleClick);
-        });
+        let callCount = 0; // Keep track of how many times the function has been called
 
         // Call the function to add tooltips after the PDF is loaded
-        const timer = setInterval(() => {
-            if (document.querySelector('.rpv-core__annotation-text-icon')) {
-                addTooltipsToAnnotations();
-                clearInterval(timer); // Stop checking once annotations are available
-            }
-        }, 100);
+        const startTimer = () => {
+            const timer = setInterval(() => {
+                if (document.querySelector('.rpv-core__annotation-text-icon')) {
+                    addTooltipsToAnnotations();
+                    callCount += 1;
+                    if (callCount >= 2) {
+                        clearInterval(timer);  // Stop after 2 calls
+                    } else {
+                        clearInterval(timer);  // Stop the current interval
+                        startTimer();  // Start a new interval
+                    }
+                }
+            }, 1000);
+        };     
+        startTimer();   
 
         return () => {
-            elements.forEach((el) => {
-                el.removeEventListener('click', handleClick);
-            });
-
-            clearInterval(timer);
+            document.body.removeEventListener('click', handleClick);
         }
-    }, []);
+    }, [pdfUrl]);
+
     return (
-        <div style={{ display: 'flex', height: '100vh' }}>
-            <div className='relative w-full max-w-[calc(100%-350px)]' onClick={handlePdfClick}>
+        <div className='flex lg:h-[100vh] lg:flex-nowrap flex-wrap lg:max-h-none max-h-[100vh] lg:overflow-y-hidden overflow-y-auto'>
+            <div className='relative w-full lg:max-w-[calc(100%-350px)] max-w-[100%]' onClick={handlePdfClick}>
                 <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`}>
                     <Viewer
                         fileUrl={pdfUrl}
                         plugins={[defaultLayout]}
                         defaultScale={1.0}
+                        initialPage={initialPage}
                         onZoom={(scale) => setScale(scale)} // Track the zoom scale
                     />
                 </Worker>
             </div>
             {/* Show comment input box when clicked */}
-            <div className='py-8 px-5 w-full max-w-[350px] border-[#ccc] border-left-1 overflow-y-auto'>
-                <h3 className='text-[14px] font-semibold mb-5 text-[#1B1B1B]'> Annotations</h3>
+            <div className='py-8 px-0 w-full lg:max-w-[350px] max-w-[100%] border-[#ccc] border-left-1 overflow-y-auto bg-[#f3f4f6] lg:mt-[0px] mt-[30px]'>
+                <h3 className='text-[14px] font-semibold mb-5 text-[#1B1B1B] flex justify-between items-center w-full border-b border-[#ddd] px-[17px] pb-[15px]'> Comment <span className='rotate-180 text-[20px]'> <RxExit /> </span> </h3>
                 <div className='relative'>
-                    <input type="search" placeholder='Type to search' className='border-[#ccc] caret-none border rounded-md w-full h-10 p-2 text-base text-[#1b1b1b] focus:ring-none focus:outline-none pr-4' />
-                    <SearchIcon className='absolute  top-[7px] right-[10px]' />
-                </div>
+                    {/* <input type="search" placeholder='Type to search' className='border-[#ccc] caret-none border rounded-md w-full h-10 ps-10 pe-2 text-base text-[#1b1b1b] focus:ring-none focus:outline-none pr-4' />
+                    <SearchIcon className='absolute  top-[7px] left-[10px]' /> */}
 
-                <div className='flex border-b border-[#f8f8f8] my-4 gap-8 items-center'>
-                    <li className='list-none ' >
-                        <span className='flex item-center gap-2 font-medium text-[#1b1b1b] py-2 font-semibold border-b border-b-[2px]  border-[#4F46E5]' >All
-                            <span className='size-6 border border-1 border-[#ccc] inline-flex justify-center items-center rounded-full text-[12px]' >0</span>
-                        </span>
-                    </li>
-                    <li className='list-none ' >
-                        <span className='flex item-center gap-1  text-[#1b1b1b] py-2 border-b border-b-[2px] border-tranasparent border-b-transparent' >Unresolved</span>
-                    </li>
-                    {/* <PiSortDescendingLight className='size-7 ml-auto' /> */}
-                    <li className='list-none'>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 128a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm73.3-64C253 35.7 224.8 16 192 16s-61 19.7-73.3 48L32 64C14.3 64 0 78.3 0 96s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 128c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 64z"/></svg>
-                    </li>
                 </div>
-                {annotations.length === 0 && <p>No Comments yet.</p>}
+                <div className='flex border-b border-[#f8f8f8] my-4 gap-8 items-center px-[17px]'>
+                    <select className='custom-select-box bg-white p-[8px_18px] ring-0 outline-[0] appearance-none rounded-md' name="" id="">
+                        <option value="">Showing All</option>
+                        <option value="">Open</option>
+                        <option value="">Resolved</option>
+                    </select>
+                </div>
+                {annotations.length === 0 && <p className='px-[17px] text-center'>No Comments yet.</p>}
                 {
                     annotations.map((comment, key) =>
-                        <Card onClick={() => clickComment(key)} className='p-5 mb-2' >
-                            <CardHeader className='p-0'>
-                                <div className='flex gap-2'>
-                                    <div className='size-7'>
-                                        <img src={profileIcon} className='w-full h-full' alt="" />
+                        <div className='px-[17px] mb-3'>
+                        <Card className='custm_card overflow-hidden' >
+                            <CardHeader className='p-[6px_8px]'>
+                            <div className='flex items-center justify-between w-full'>
+                                <form className='text-[12px] flex gap-1 items-center' action="">
+                                    <input className='' type="checkbox" name="" id="" />
+                                    Resolve
+                                </form>
+                                <p className='text-[12px]'>Assigned to  <span className='font-semibold'>Test User</span></p>
+                            </div>
+                            </CardHeader>
+                            <CardContent className='px-[10px] pt-3 text-[#1b1b1b]'>
+                                <div className='flex justify-between items-center p-[4px_0px]'>
+                                    <div className='mb-0'>
+                                        {/* <img src={profileIcon} className='w-full h-full' alt="" /> */}
+                                        <div className='flex items-center text-[12px]'>
+                                            <span className='relative mr-2' onClick={()=>{handleCommentClick(key)}}>
+                                                {/* <CiChat2 size={25}/> */}
+                                                <img src={MessageIcon} alt="Message" className='w-[22px]'/>
+                                                <span className='flex gap-2 absolute text-[#0E00FF] top-[1px] left-[8px]'>{key + 1}</span>
+                                            </span>
+                                           <span className='font-bold'>User Test</span>
+                                        </div>
                                     </div>
-                                    <div className='flex items-center'>
-                                        <span className='relative mr-2'><CiChat2 size={25} /><span className='flex gap-2 absolute text-[8px] top-[5px] left-[11px] ' >{key + 1}</span></span>
-                                        <span> User Test <span className='text-[12px] text-[#1b1b1b] opacity-50 m-1'>2d ago</span></span>
+                                    <div className='flex gap-2 mt-0'>
+                                        <div className='flex items-center text-[12px]'>
+                                            {/* <span className='relative mr-2' onClick={()=>{handleCommentClick(key)}}><CiChat2 size={25}/><span className='flex gap-2 absolute text-[8px] top-[5px] left-[11px]'>{key + 1}</span></span> */}
+                                            <span> <span className='text-[12px] text-[#1b1b1b] opacity-50 m-1'>2d Ago</span></span>
+                                            <p><BsThreeDotsVertical /></p>
+                                        </div>
                                     </div>
                                 </div>
-                            </CardHeader>
-                            <CardContent className='p-0 pt-3 text-[#1b1b1b]'>
-                                <p className='text-left text-sm'>{comment?.comment}</p>
-                                {comment?.reply && (
+                                <p className='text-left text-sm pt-[30px] pb-[40px]'>{comment?.comment}</p>
+                                <div>
+                                    <img className='w-full max-w-[150px]' src={ProductImage} alt="product" />
+                                </div>
+                                {comment?.reply?.map((message) =>
                                     <div>
                                         <div className='flex gap-2 pt-4 mb-1'>
-                                            <div className='size-7'>
-                                                <img src={profileIcon} className='w-full h-full' alt="" />
-                                            </div>
                                             <div className='flex items-center'>
-                                                <span> User Test <span className='text-[12px] text-[#1b1b1b] opacity-50 m-1'>2d ago</span> </span>
+                                                <div className='size-7'>
+                                                    <img src={profileIcon} className='w-full h-full' alt="" />
+                                                </div>
+                                                <span> <span className='font-bold'>User Test</span> <span className='text-[12px] text-[#1b1b1b] opacity-50 m-1'>2d ago</span> </span>
                                             </div>
                                         </div>
-                                        {comment?.reply?.map((message) =>
-                                            <p className='text-sm text-[#1b1b1b]' >
-                                                {message}
-                                            </p>
-                                        )}
+                                        <p className='text-left text-sm pt-[20px] pb-[40px]'>{message}</p>
                                     </div>
                                 )}
+                                {/* {comment?.reply && (
+                                    <div>
+                                        <div className='size-7'>
+                                                <img src={profileIcon} className='w-full h-full' alt="" />
+                                            </div>
+                                        <div className='flex gap-2 pt-4 mb-1'>
+                                            <div className='flex items-center'>
+                                                <span> <span className='font-bold'>User Test</span> <span className='text-[12px] text-[#1b1b1b] opacity-50 m-1'>2d ago</span> </span>
+                                            </div>
+                                        </div>
+                                      
+                                    </div>
+                                )} */}
                             </CardContent>
+                            {
+                                (key != readyForReply) && (
+                                    <div className='flex items-center justify-between px-[10px] py-[10px] border-t border-[#ddd]'>
+                                        {/* <img src="" alt="" /> */}
+                                        <BiLike />
+                                    {/* <Button  onClick={() => clickComment(key)} >Reply</Button> */}
+                                    <button className='text-[12px] text-[#444] font-semibold' onClick={() => clickComment(key)}><span>0</span> Reply </button>
+                                   </div>
+                                )
+                            }
                             {(key == readyForReply) && (
-                                <CardFooter className='p-0 pt-3'>
+                                <CardFooter className='p-0 px-[10px] py-[10px]'>
                                     <p className='flex gap-1'>
-                                        <Input placeholder='Add Reply' value={currentReply} onChange={(e) => (setCurrentReply(e.target.value))} />
-                                        <Button onClick={() => addReply(key)}>Reply</Button>
+                                        <Input className='outline-none' placeholder='Add Reply' value={currentReply} onChange={(e) => (setCurrentReply(e.target.value))} />
+                                        <Button onClick={() => addReply(key)}>Add Reply</Button>
                                     </p>
                                 </CardFooter>
                             )
                             }
                         </Card>
+                        </div>
                     )
                 }
-                    <div className='w-full fixed  bottom-px max-w-[300px] bg-white'>
+                    <div className='w-full fixed lg:max-w-[330px] max-w-[280px] bg-white bottom-[0px] pb-[15px] right-[10px] '>
                         {showInput && (
-                            <div>
+                        <div className='px-[10px] pb-[10px]'>
+                            <div className='py-[15px] text-[14px] flex items-center gap-[20px]'>
+                                <p>Add Comment</p>
+                                <p className='flex flex-1 items-center gap-2 text-[14px]'><button className='max-w-[30px] h-[30px] w-full flex justify-center items-center shadow-lg rounded-full'><LuUserPlus /></button>No Assignee</p>
+                            </div>
+                            <div className='border border-[#ddd] rounded-[4px]'>
+                            <form action="">
                             <Textarea
                                 value={newComment}
                                 onChange={handleCommentChange}
                                 placeholder="Enter your comment"
-                                rows="4"
-                                className='w-full focus:outline-none'
+                                rows="2"
+                                className='w-full border-0 focus:outline-none focus-visible:outline-none focus-visible:ring-[0] resize-none custm_textar'
                             />
-                            <Button className='mt-2 ' onClick={saveAnnotation}>Add Comment</Button>
+                               <div className='flex items-center justify-between border-t border-[#ddd] px-[12px] py-[10px]'>
+                                <div className='flex items-center relative gap-2 bg-[#d4d4d454] p-[6px_10px] rounded-full'>
+                                <i class="fa fa-paperclip text-[#444]" aria-hidden="true"></i>
+                                <p className='text-[#444] text-[12px]'>Attach files</p>
+                                <input className='absolute top-0 left-0 w-full opacity-0 cursor-pointer z-10' type="file" id="myFile" name="filename" />
+                                </div>
+                            <Button className='mt-0 bg-[#0000ff85] text-[12px]' onClick={saveAnnotation}>Add Comment</Button>
+                               </div>
+                            </form>
                             </div>
+                            </div>
+                           
                             )}
-                        {/* Save to PDF Button */}
-                        {(annotations.length > 0 && !showInput) && (
-                            <Button onClick={saveAnnotationsToPdf} style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
-                                Save PDF
-                            </Button>
-                        )}
                     </div>
             </div>
         </div>
