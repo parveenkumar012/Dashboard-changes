@@ -1,11 +1,8 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './App.css';
 import Dashboard from './Dashboard';
 import SupplierOnBoard from './supplier/onboard.jsx';
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from "react-router-dom";
-import PdfViewer  from './components/PdfViewer';
+import PdfViewer from './components/PdfViewer';
 import PdfViewerWithLayout from './components/PdfViewerWithLayout';
 
 function App() {
@@ -17,8 +14,14 @@ function App() {
         <Route path="/pdf-viewer" element={<PdfViewer />} />
         <Route path="/" element={<PdfViewerWithLayout />} />
       </Route>
-    )
+    ),
+    {
+      future: {
+        v7_startTransition: true, // Opting into the v7_startTransition behavior
+      },
+    }
   );
+
   return <RouterProvider router={router} />;
 }
 

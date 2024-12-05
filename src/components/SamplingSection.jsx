@@ -1,10 +1,7 @@
 import React from 'react';
-import {
-    Card
-  } from "@/components/ui/card"
-
-  import ReviewCard from './ReviewCard';
-import { EllipsisVertical, Plus } from 'lucide-react';
+import ReviewCard from './ReviewCard';
+import { EllipsisVerticalIcon, PlusIcon } from 'lucide-react';
+import { Button } from "@/components/ui/button"
 
 const SamplingSection = ({color}) => {
     const cardsData = [
@@ -19,12 +16,12 @@ const SamplingSection = ({color}) => {
             <div className={`flex justify-between items-center p-2 rounded-lg mb-4`} style={{ backgroundColor: color }} >
                 <h2 className="text-gray-700 font-semibold text-white">Sampling</h2>
                 <div className='flex gap-x-[5px] items-center'>
-                <button className="p-1 bg-[#E4E2FF] rounded hover:bg-gray-400">
-                    <Plus size={16} />
-                </button>
-                <button className="p-1 bg-[#E4E2FF] rounded hover:bg-gray-400">
-                <EllipsisVertical size={16} />
-                </button>
+                    <Button className="p-1 bg-[#E4E2FF] rounded hover:bg-gray-400">
+                        <PlusIcon size={16} />
+                    </Button>
+                    <Button className="p-1 bg-[#E4E2FF] rounded hover:bg-gray-400">
+                        <EllipsisVerticalIcon size={16} />
+                    </Button>
                 </div>
             </div>
 
