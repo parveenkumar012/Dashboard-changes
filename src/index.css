@@ -259,3 +259,7 @@ select.custom-select-box {
 span.messageText {
   color: #0E00FF;
 }
+
+.template:hover img {
+  filter:invert(1) brightness(100%);
+}

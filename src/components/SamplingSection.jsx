@@ -14,13 +14,13 @@ const SamplingSection = ({color}) => {
         <div className="">
             {/* Section Header */}
             <div className={`flex justify-between items-center p-2 rounded-lg mb-4`} style={{ backgroundColor: color }} >
-                <h2 className="text-gray-700 font-semibold text-white">Sampling</h2>
+                <h2 className="font-semibold text-white">Sampling</h2>
                 <div className='flex gap-x-[5px] items-center'>
-                    <Button className="p-1 bg-[#E4E2FF] rounded hover:bg-gray-400">
-                        <PlusIcon size={16} />
+                    <Button className="p-1 bg-[#E4E2FF] w-6 h-6 rounded group hover-bg-[#1b1b1b]">
+                        <PlusIcon className='text-[#1b1b1b] group-hover:text-white' size={16} />
                     </Button>
-                    <Button className="p-1 bg-[#E4E2FF] rounded hover:bg-gray-400">
-                        <EllipsisVerticalIcon size={16} />
+                    <Button className="p-1 bg-[#E4E2FF] w-6 h-6 rounded group hover-bg-[#1b1b1b]">
+                        <EllipsisVerticalIcon className='text-[#1b1b1b] group-hover:text-white' size={16} />
                     </Button>
                 </div>
             </div>

@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card"
+import React, { useEffect, useState,createContext, useContext } from "react";
 import { Header } from "./components/Header";
 import MainSidebar from "./components/MainSidebar";
 import ButtonGroup from "./components/ButtonGroup";
@@ -7,8 +6,7 @@ import SamplingSection from "./components/SamplingSection";
 import { TaskCard } from "./components/Task";
 import productImg from "./assets/product.png";
 import { Button } from "@/components/ui/button"
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react"; // Arrow icon from lucide-react
-
+import Products from './components/Products/Products.jsx';
   
 function Dashboard({
     title = "Task Title", status = "PENDING", startDate = "Mar 30", endDate = "Apr 13", applicableCards = ["Packaging", "Inspection"], 
@@ -223,39 +221,7 @@ function Dashboard({
                   <div className="sticky top-0 z-[10] bg-white w-full  min-w-[932px] pr-[12px] lg:pr-[25px] pt-4 pb-5" ><SamplingSection color="#818094"/></div>
                   <div className="sticky top-0 z-[10] bg-white  min-w-[932px] pl-[12px] lg:pl-[25px] pt-4 pb-5" ><SamplingSection color="#4F46E5"/></div>
                 </div>
-                {products.map((product) => (
-                  <div className="flex border-b-[1px] bg-white w-[1920px]  lg:w-[calc(100%+122.9%)] xl:w-[calc(100%+335px)]">
-                    <div className="sticky left-0 z-20  w-full max-w-[116px] min-w-[116px] md:max-w-[175px] md:min-w-[175px] lg:max-w-[227px] pl-3 lg:pl-6 lg:min-w-[227px] pr-[13px] bg-white pt-4 pb-5" >
-                      <Card key={product.id} className=" pl-24 flex items-center flex-wrap  px-0 relative shadow-none rounded-none border-x-0 border-t-0  border-b-[0px]">
-                        {/* Product Image */}
-                        <div className="w-full">
-                          <img src={product.imageUrl} alt={product.name} className="w-16 h-16 rounded mr-4"/>
-                        </div>
-            
-                        {/* Product Info */}
-                        <div className="flex flex-col mt-[21px]">
-                          <h4 className="font-medium text-[#1B1B1B] text-[13px]">{product.name}</h4>
-                          <p className="text-[#667085] text-[10px]">{product.sku}</p>
-                        </div>
-            
-                        {/* Expand Icon */}
-                        <Button className="" onClick={()=>(expandCollapse([product?.id,product?.isExpand]))}>
-                            {product?.isExpand == true ? 
-                              <ChevronUpIcon className="absolute top-[10px] right-[10px]  w-5 h-5 text-[#1b1b1b]"/>
-                              :
-                              <ChevronDownIcon className="absolute top-[10px] right-[10px]  w-5 h-5 text-[#1b1b1b]"/>
-                            }
-                        </Button>
-                      </Card>
-                    </div>
-                    <div className="bg-white w-full items-start  min-w-[932px] pr-[12px] lg:pr-[25px] grid grid-cols-3 space-x-4 pt-4 pb-5">
-                      {renderTaskCards(product.status, product.isExpand)}
-                    </div>
-                    <div className="bg-white  min-w-[932px] lg:pl-[25px] pl-[12px]  grid grid-cols-3 space-x-4 items-start pt-4 pb-5">
-                      {renderTaskCards(product.status, product.isExpand)}
-                    </div>  
-                  </div>
-                ))}
+                  <Products products={products} renderTaskCards={renderTaskCards} expandCollapse={expandCollapse}/>
               </div>
           </div> 
         </div>

@@ -28,8 +28,6 @@ const Tooltip = ({ children, content, position = "top",hide_bottom_arrow }) => {
           }`}
         >
           {/* {content} */}
-
-
             <div className="" >
              <div className="flex" >
               <span className="size-10 rounded-full overflow-hidden">

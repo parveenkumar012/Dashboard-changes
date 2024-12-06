@@ -2,7 +2,7 @@ import React from "react";
 import { CalendarIcon, PaperclipIcon, CircleCheckIcon, MessagesSquareIcon } from "lucide-react"; // Using Lucide icons for similar icons
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import Tooltip from "../components/ToolTip";
+import TooltipDemo from "../components/TooltipDemo";
 import Dropdown from '../components/Dropdown';
 
 export function TaskCard({
@@ -71,21 +71,21 @@ export function TaskCard({
               <p className="text-[9px] text-[#667085] uppercase mb-[5px]">Applicable cards</p>
               <div className="flex flex-wrap gap-1">
                 <Badge variant="custom">
-                  <Tooltip  content="" position="bottom" hide_bottom_arrow={true}>
+                  <TooltipDemo position="bottom right" >
                     Packaging
-                  </Tooltip>
+                  </TooltipDemo>
                 </Badge>
                 <Badge variant="custom">
-                  <Tooltip  content="" position="bottom right" hide_bottom_arrow={true}>
+                <TooltipDemo position="bottom right" >
                     Packaging
-                  </Tooltip>
+                  </TooltipDemo>
                 </Badge>
                 <Badge variant="custom">
-                  <Tooltip  content="" position="right" hide_bottom_arrow={true}>
+                  <TooltipDemo position="bottom right" >
                     Packaging
-                  </Tooltip>
+                  </TooltipDemo>
                 </Badge>
-                <Badge className="cursor-pointer text-xs bg-gray-100 text-gray-700 text-[10px] hover:bg-[#1B1B1B] hover:text-white  text-[#667085] px-[5px] py-[1px] rounded-[5px] bg-[#F6F6F6]">
+                <Badge className="cursor-pointer text-x text-[10px] hover:bg-[#1B1B1B] hover:text-white  text-[#667085] px-[5px] py-[1px] rounded-[5px] bg-[#F6F6F6]">
                   <Dropdown content="done" position="bottom"> 2 More </Dropdown>
                 </Badge>
               </div>

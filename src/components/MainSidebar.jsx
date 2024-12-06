@@ -7,28 +7,28 @@ const MainSidebar = () => {
         <div className="h-screen bg-gray-900 w-[50px] md:w-[86px] text-white flex flex-col items-center py-4 space-y-0 md:space-y-6 fixed left-0 top-0">
             {/* Icons */}
             <Button className="hover:bg-gray-700 p-2 rounded">
-                <HomeIcon size={24} />
+                <HomeIcon className='!size-6' size={24} />
             </Button>
             <Button className="hover:bg-gray-700 p-2 rounded">
-                <RefreshCcwIcon size={24} />
+                <RefreshCcwIcon className='!size-6' size={24} />
             </Button>
             <Button className="hover:bg-gray-700 p-2 rounded">
-                <BoxIcon size={24} />
+                <BoxIcon className='!size-6' size={24} />
             </Button>
             <Button className="hover:bg-gray-700 p-2 rounded">
-                <LinkIcon size={24} />
+                <LinkIcon className='!size-6' size={24} />
             </Button>
             <Button className="hover:bg-gray-700 p-2 rounded">
-                <Share2Icon size={24} />
+                <Share2Icon className='!size-6' size={24} />
             </Button>
             <Button className="hover:bg-gray-700 p-2 rounded">
-                <GridIcon size={24} />
+                <GridIcon className='!size-6' size={24} />
             </Button>
             <Button className="hover:bg-gray-700 p-2 rounded">
-                <FileTextIcon size={24} />
+                <FileTextIcon className='!size-6' size={24} />
             </Button>
             <Button className="hover:bg-gray-700 p-2 rounded">
-                <SettingsIcon size={24} />
+                <SettingsIcon className='!size-6' size={24} />
             </Button>
 
             {/* Spacer */}
@@ -36,7 +36,7 @@ const MainSidebar = () => {
 
             {/* Help icon */}
             <Button className="hover:bg-gray-700 p-2 rounded mb-4">
-                <HelpCircleIcon size={24} />
+                <HelpCircleIcon className='!size-6' size={24} />
             </Button>
         </div>
     );
