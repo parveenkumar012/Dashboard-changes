@@ -19,12 +19,12 @@ const ButtonGroup = () => {
                     <Button className="p-0 border hover:bg-transparent rounded-[5.97px] bg-white hover:border-[#4F46E5] border-[#4F46E5] list-switcher size-[26px] md:size-9 inline-flex justify-center items-center">
                         <img src={listIcon} alt="list icon" className='size-3 md:size-5' />
                     </Button>
-                    <Button className="p-0 border border-[#DADADA] hover:bg-transparent bg-white rounded-[5.97px] size-[26px] md:size-9  hover:border-[#4F46E5] list-switcher size-9 inline-flex justify-center items-center">
+                    <Button className="p-0 border border-[#DADADA] hover:bg-transparent bg-white rounded-[5.97px] size-[26px] md:size-9  hover:border-[#4F46E5] list-switcher inline-flex justify-center items-center">
                         <img src={gridIcon} alt="grid icon" className='size-3 md:size-5' />
                     </Button>
                 </div>
                 {/* Save as Template Button */}
-                <Button className="flex template w-full md:w-auto bg-white hover:text-white  group md:max-auto max-w-[calc(100%-61px)] items-center px-[6px] md:px-[12px] py-2 border border-gray-300 rounded-md text-black  hover:bg-[#1B1B1B] hover:text-white group text-[8px] md:text-[14px]">
+                <Button className="flex template w-full md:w-auto bg-white hover:text-white  group md:max-auto max-w-[calc(100%-61px)] items-center px-[6px] md:px-[12px] py-2 border border-gray-300 rounded-md text-black  hover:bg-[#1B1B1B] group text-[8px] md:text-[14px]">
                     <img src={trainTrack} alt="track" className="mr-2 group-hover:text-white size-2 md:size-5" />
                     Save as Template
                 </Button>
