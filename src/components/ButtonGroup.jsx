@@ -9,8 +9,8 @@ const ButtonGroup = () => {
     return (
         <div className="flex items-center  gap-y-[10px] md:flex-row px-[10px] gap-x-[5px] md:px-[30px] py-[10px] w-full justify-between sticky left-0 z-20 bg-white">
             {/* Add Milestone Group Button */}
-            <Button className="w-[120px] md:w-auto justify-center bg-white flex items-center px-[6px] md:px-[12px] py-2 border border-gray-300 rounded-md text-black  hover:bg-[#1B1B1B] hover:text-white group text-[8px] md:text-[14px]">
-                <PlusIcon className="mr-2 group-hover:text-white size-2 md:size-5"   />
+            <Button className=" w-[120px] bg-transparent font-normal gap-0  md:w-auto justify-center flex items-center px-[8px] md:px-[12px] h-10 shadow-none  border border-gray-300 rounded-md text-black  hover:bg-[#1B1B1B] hover:text-white group text-[8px] md:text-[14px]">
+                <PlusIcon className="mr-2 group-hover:text-white size-5 md:!size-5"   />
                 Add Milestone Group
             </Button>
             <div className='flex  gap-x-[5px] md:gap-x-[10px] w-full md:w-auto max-w-[160px] md:max-w-[270px] '>

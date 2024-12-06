@@ -1,6 +1,6 @@
-import React from 'react';
-import ReviewCard from './ReviewCard';
-import { EllipsisVerticalIcon, PlusIcon } from 'lucide-react';
+import React from 'react'
+import ReviewCard from './ReviewCard'
+import { EllipsisVerticalIcon, PlusIcon } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 
 const SamplingSection = ({color}) => {
@@ -28,15 +28,8 @@ const SamplingSection = ({color}) => {
             {/* Cards */}
             <div className="flex space-x-4  ">
                 {cardsData.map((card, index) => (
-                    <ReviewCard
-                        key={index}
-                        tag={card.tag}
-                        title={card.title}
-                        viewCount={card.viewCount}
-                        progress={card.progress}
-                        commentCount={card.commentCount}
-                        cardCount={card.cardCount}
-                    />
+                    <ReviewCard key={index} tag={card.tag} title={card.title} viewCount={card.viewCount} progress={card.progress}
+                        commentCount={card.commentCount} cardCount={card.cardCount} />
                 ))}
             </div>
         </div>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { HomeIcon, RefreshCcwIcon, BoxIcon, LinkIcon, Share2Icon, GridIcon, FileTextIcon, SettingsIcon, HelpCircleIcon } from 'lucide-react'; // Icons from lucide-react
+import React from 'react'
+import { HomeIcon, RefreshCcwIcon, BoxIcon, LinkIcon, Share2Icon, GridIcon, FileTextIcon, SettingsIcon, HelpCircleIcon } from 'lucide-react' // Icons from lucide-react
 import { Button } from "@/components/ui/button"
 
 const MainSidebar = () => {

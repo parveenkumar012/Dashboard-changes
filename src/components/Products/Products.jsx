@@ -1,5 +1,5 @@
-import React from "react";
-import ProductRow from "./ProductRow/ProductRow";
+import React from "react"
+import ProductRow from "./ProductRow/ProductRow"
 
 const Products = ({ products, renderTaskCards, expandCollapse }) => {
   return (

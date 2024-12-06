@@ -1,17 +1,14 @@
-import React, { useEffect, useState,createContext, useContext } from "react";
-import { Header } from "./components/Header";
-import MainSidebar from "./components/MainSidebar";
-import ButtonGroup from "./components/ButtonGroup";
-import SamplingSection from "./components/SamplingSection";
-import { TaskCard } from "./components/Task";
-import productImg from "./assets/product.png";
+import React, { useEffect, useState } from "react"
+import { Header } from "./components/Header"
+import MainSidebar from "./components/MainSidebar"
+import ButtonGroup from "./components/ButtonGroup"
+import SamplingSection from "./components/SamplingSection"
+import { TaskCard } from "./components/Task"
+import productImg from "./assets/product.png"
 import { Button } from "@/components/ui/button"
-import Products from './components/Products/Products.jsx';
+import Products from './components/Products/Products.jsx'
   
-function Dashboard({
-    title = "Task Title", status = "PENDING", startDate = "Mar 30", endDate = "Apr 13", applicableCards = ["Packaging", "Inspection"], 
-    metrics= {approved: 2, pending: 4, issues: 1, days: 34}
-  }) {
+function Dashboard() {
 
   const [products, setProducts] = useState([]);
 
