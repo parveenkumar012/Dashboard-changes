@@ -84,12 +84,12 @@ function App() {
           </div>
         <div className="flex gap-2">
           <Button className="bg-white h-10 font-semibold text-[#18181B]"  variant="ghost">Sign Up</Button>
-          <Button className="bg-blue-700 h-10 font-semibold bg-[#4F46E5]" variant="default">Login</Button>
+          <Button className="h-10 font-semibold bg-[#4F46E5]" variant="default">Login</Button>
         </div>
         </div>
       </header>
 
-      <div className="mb-6 flex items-center justify-between bg-white py-10 px-12 bg-white">
+      <div className="mb-6 flex items-center justify-between py-10 px-12 bg-white">
         <div className="flex items-center gap-2 w-full max-w-[1600px] mx-auto justify-between">
             <div className="flex items-center gap-4">
                 <img
@@ -160,13 +160,13 @@ function App() {
                 <CollapsibleTrigger className="flex w-full items-center justify-between py-4 pl-8 pr-14">
                   <div className="flex items-center gap-4">
                     {(product.status === 'Warning') && (
-                      <span className="border mr-6 border-[#F0AF1D] border-[2px] size-7 rounded-full flex justify-center items-center"><span className="w-2 h-[2px] rounded-full bg-[#F0AF1D] block"></span></span>
+                      <span className="mr-6 border-[#F0AF1D] border-[2px] size-7 rounded-full flex justify-center items-center"><span className="w-2 h-[2px] rounded-full bg-[#F0AF1D] block"></span></span>
                     )}
                      {(product.status === 'Success') && (
-                      <span className="border mr-6 border-[#12B76A] border-[2px] size-7 rounded-full flex justify-center items-center bg-[#12B76A]"><span className=""><img src={checkIcon} alt="" /></span></span>
+                      <span className="mr-6 border-[#12B76A] border-[2px] size-7 rounded-full flex justify-center items-center bg-[#12B76A]"><span className=""><img src={checkIcon} alt="" /></span></span>
                     )}
                     {(product.status === 'Awaiting') && (
-                      <span className="border mr-6 border-[#DADADA] border-[2px] size-7 rounded-full flex justify-center items-center"><span className="size-2 rounded-full bg-[#DADADA] block"></span></span>
+                      <span className="mr-6 border-[#DADADA] border-[2px] size-7 rounded-full flex justify-center items-center"><span className="size-2 rounded-full bg-[#DADADA] block"></span></span>
                     )}
                    
                     <img
@@ -235,7 +235,7 @@ function App() {
                                 }
                               </td>
                               <td className="p-2 text-sm">
-                                <Button className="bg-white text-[#18181B] text-sm text-black text-sm  items-center hover:text-white border border-[#DEDEDE] " >
+                                <Button className="bg-white text-black text-sm  items-center hover:text-white border border-[#DEDEDE] " >
                                   <img src={fileUpload} alt="" />
                                   Review & Upload</Button>
                               </td>
