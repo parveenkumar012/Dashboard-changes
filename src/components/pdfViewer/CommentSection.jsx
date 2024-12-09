@@ -4,13 +4,13 @@ import CommentCard from './CommentCard';
 import CommentInputSection from './CommonInputSection';
 import { RxExit } from "react-icons/rx";
 
-const CommentSection = ({ filteredAnnotations, handleFilterRecords, handleLikeClick, handleReplyClick, handleEditClick, handleDeleteComment, currentReply, setCurrentReply, addCommentReply, showUsers, users, assignedUser, handleUserChange, getAssignedUser, errors, handleResolveCheck, formatDate, handleCommentChange, setShowUsers, newComment, changeDocument, imageSrc, saveAnnotation, editAbleComment, showInput, updateAnnotation, readyForReply }) => {
+const CommentSection = ({ filteredAnnotations, handleFilterRecords, handleLikeClick, handleReplyClick, handleEditClick, handleDeleteComment, currentReply, setCurrentReply, addCommentReply, showUsers, users, assignedUser, handleUserChange, getAssignedUser, errors, handleResolveCheck, formatDate, handleCommentChange, setShowUsers, newComment, changeDocument, imageSrc, saveAnnotation, editAbleComment, showInput, updateAnnotation, readyForReply,currentStatus }) => {
     return (
         <div className='py-8 px-0 w-full lg:max-w-[350px] max-w-[100%] border-[#ccc] border-left-1 overflow-y-auto bg-[#f3f4f6] lg:mt-[0px] mt-[30px] right_side-bar'>
             <h3 className='text-[14px] font-semibold mb-5 text-[#1B1B1B] flex justify-between items-center w-full border-b border-[#ddd] px-[17px] pb-[15px]'> 
                 Comment <span className='rotate-180 text-[20px]'> <RxExit /> </span> 
             </h3>
-            <CommentFilter handleFilterRecords={handleFilterRecords} />
+            <CommentFilter handleFilterRecords={handleFilterRecords} currentStatus={currentStatus} />
             {filteredAnnotations?.length === 0 && <p className='px-[17px] text-center'>No Comments yet.</p>}
             {filteredAnnotations.map((comment, key) => (
                 <CommentCard

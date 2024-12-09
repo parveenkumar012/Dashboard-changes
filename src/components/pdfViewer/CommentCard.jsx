@@ -16,11 +16,11 @@ const CommentCard = ({ Key, comment, handleLikeClick, handleReplyClick, handleEd
                         <div className='flex items-center justify-between w-full'>
                             <form className='text-[12px] flex gap-1 items-center'>
                                 <Input type="checkbox" name="checkbox"  checked={comment?.status == '2'} onChange={handleResolveCheck} value={comment?.id}/>
-                                <span className={`${comment.status === '2' && 'text-green-600'}`}>
-                                    {comment?.status === '2' ? 'Resolved' : 'Resolve'}
+                                <span className={`${comment?.status == '2' && 'text-green-600'}`}>
+                                    {comment?.status == '2' ? 'Resolved' : 'Resolve'}
                                 </span>
                             </form>
-                            <p className={`text-[12px] ${comment.status === '2' && 'text-green-600 line-through'}`}>
+                            <p className={`text-[12px] ${comment.status == '2' && 'text-green-600 line-through'}`}>
                                 Assigned to <span className='font-semibold'>{getAssignedUser(comment?.assignedUser)}</span>
                             </p>
                         </div>

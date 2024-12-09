@@ -2,7 +2,6 @@ import './App.css';
 import Dashboard from './Dashboard';
 import SupplierOnBoard from './supplier/onboard.jsx';
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from "react-router-dom";
-import PdfViewer from './components/PdfViewer';
 import PdfViewerWithLayout from './components/PdfViewerWithLayout';
 
 function App() {
@@ -11,7 +10,6 @@ function App() {
       <Route path="/">
         <Route path="/dash" element={<Dashboard />} />
         <Route path="/supplier-onboarding" element={<SupplierOnBoard />} />
-        <Route path="/pdf-viewer" element={<PdfViewer />} />
         <Route path="/" element={<PdfViewerWithLayout />} />
       </Route>
     ),

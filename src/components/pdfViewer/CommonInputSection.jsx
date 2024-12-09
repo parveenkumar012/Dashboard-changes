@@ -3,21 +3,32 @@ import { LuUserPlus } from "react-icons/lu";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "../ui/button";
 import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 const CommentInputSection = ({ showUsers, setShowUsers, users, assignedUser, handleUserChange, errors, getAssignedUser, handleCommentChange, newComment, changeDocument, imageSrc, saveAnnotation, editAbleComment, showInput, updateAnnotation }) => {
     return (
         <div className='w-full fixed lg:max-w-[330px] max-w-[280px] bottom-[0px] pb-[15px] right-[10px]'>
             <div className='py-[15px] text-[14px] flex items-center gap-[20px]'>
                 <p className='font-bold'>Add Comment</p>
-                <p className='flex flex-1 items-center gap-2 text-[14px]'>
-                    <Button className='max-w-[30px] h-[30px] w-full flex justify-center items-center shadow-lg rounded-full' onClick={() => setShowUsers(true)}><LuUserPlus /></Button>
+                <p className='flex flex-1 items-center gap-2 text-[14px] custom-select-box custom-button'>
+                    <Button className='max-w-[30px] h-[30px] user_icon w-full flex justify-center items-center shadow-lg rounded-full' onClick={() => setShowUsers(true)}><LuUserPlus /></Button>
                     {(users?.length > 0 && showUsers) && (
-                        <select name="" id="" onChange={handleUserChange} className='bg-white p-[8px_18px] ring-0 outline-[0] rounded-md' key={1}>
-                            <option value="">Choose User</option>
+                        <Select onValueChange={handleUserChange} className='bg-white p-[8px_18px] ring-0 outline-[0] rounded-md' key={1}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Choose User" />
+                            </SelectTrigger>
+                            <SelectContent>
                             {users.map(item => (
-                                <option value={item?.id} selected={item.id === assignedUser}>{item?.name}</option>
+                                <SelectItem value={item?.id} selected={item.id === assignedUser}>{item?.name}</SelectItem>
                             ))}
-                        </select>
+                            </SelectContent>
+                        </Select>
                     )}
                     {assignedUser ? 'Assigned to ' + getAssignedUser(assignedUser) : 'No Assignee'}
                 </p>

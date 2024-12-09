@@ -346,8 +346,8 @@ const PdfViewerWithLayout = () => {
         setUsers(AllUsers);
     }
 
-    const handleUserChange = (e) => {
-        setAssignedUser(e.target.value);
+    const handleUserChange = (value) => {
+        setAssignedUser(value);
         setShowUsers(false);
     }
 
@@ -405,8 +405,9 @@ const PdfViewerWithLayout = () => {
         }
     }
 
-    const handleFilterRecords = async (e) => {
-        let num = e.target.value;
+    const handleFilterRecords = async (value) => {
+        
+        let num = value;
         if (num == 0) {
             setCurrentStatus(null);
             return;
@@ -642,7 +643,7 @@ const PdfViewerWithLayout = () => {
                 handleUserChange={handleUserChange} getAssignedUser={getAssignedUser} errors={errors} handleResolveCheck={handleResolveCheck}
                 formatDate={formatDate} handleCommentChange={handleCommentChange} setShowUsers={setShowUsers} newComment={newComment} changeDocument={changeDocument}
                 imageSrc={imageSrc} saveAnnotation={saveAnnotation} editAbleComment={editAbleComment} showInput={showInput}
-                updateAnnotation={updateAnnotation} readyForReply={readyForReply}
+                updateAnnotation={updateAnnotation} readyForReply={readyForReply} currentStatus={currentStatus}
             />
         </div>
     );

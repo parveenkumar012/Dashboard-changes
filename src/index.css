@@ -248,13 +248,30 @@ filter:invert(1) brightness(100%);
   min-width: 334px;
   max-width: 334px;
 }
-select.custom-select-box {
-  background: url(http://localhost:5173/src/assets/drop_icon.png);
+
+.custom-select-boxs >button {
+    background-image: url(http://localhost:5173/src/assets/drop_icon.png) !important;
+    background: no-repeat;
+    background-size: 8px;
+    background-position: 95% 50%;
+}
+.custom-select-box.custom-button>button.user_icon {
+  background-image: unset !important;
+  background-repeat: inherit;
+    background-size: 18px;
+    background-position: 100% 50%;
+}
+.custom-select-box.custom-button>button.user_icon svg{
+  display: block !important;
+}
+.custom-select-box.custom-button>button {
+  background-image: url(http://localhost:5173/src/assets/drop_icon.png) !important;
   background-repeat: no-repeat;
   background-size: 8px;
-  background-color: #fff;
-  background-position: 90% 55%;
-  padding-right: 30px;
+  background-position: 95% 50%;
+}
+.custom-select-boxs >button svg {
+    display: none;
 }
 span.messageText {
   color: #0E00FF;
