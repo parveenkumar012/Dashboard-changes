@@ -403,8 +403,7 @@ const PdfViewerWithLayout = () => {
             setEditAbleComment(null);
             setImageSrc(null);
             setErrors({ ...errors, commentErr: '' })
-        }
-        else {
+        } else {
             setErrors({ ...errors, commentErr: 'Please add comment first' })
         }
     }
@@ -432,21 +431,18 @@ const PdfViewerWithLayout = () => {
     }
 
     const handleLikeClick = async (id) => {
-
         const updatedAnnotations = annotations.map((annotation) => {
             if (annotation.id == id) {
                 if (annotation.like == true) {
                     // return { ...annotation, like: false };
                     annotation.like = false;
                     return annotation;
-                }   
-                else {
+                } else {
                     // return { ...annotation, like: true };
                     annotation.like = true;
                     return annotation;
                 }
-            }
-            else {
+            } else {
                 return annotation;
             }
         });
@@ -488,18 +484,14 @@ const PdfViewerWithLayout = () => {
                         const annotation = annotations.filter(annotation => annotation.id == event.target.value);
                         let AllReplys = '';
                         annotation[0].reply.forEach((item, key) => {
-
-                            AllReplys += `<div class="inner mt-1">
+                            AllReplys+= `<div class="inner mt-1">
                                             <div class="top_row">
                                                 <h3><span>UT</span>User Test</h3>
                                                 <p>${formatDate(item?.date)}</p>
                                             </div>
                                             <p>${item?.commentReply}</p>
                                             ${(item?.imageUrl) ?
-                                    `<p>
-                                                <img src=" ${item?.imageUrl}" alt="">
-                                                </p>`
-                                    : ''}
+                                            `<p><img src=" ${item?.imageUrl}" alt=""></p>`: ''}
                                             <div class="footer_row">
                                                 <div class="cooment" data-id="${annotation[0]?.id}" data-key="${key}">
                                                     <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg">
@@ -516,18 +508,15 @@ const PdfViewerWithLayout = () => {
                         like_reply_total_container.querySelector('.ClickCommentReplyTooltip').innerHTML = `${annotation[0].reply.length} reply`;
                     }
                 });
-            }
-            else if (event.target && (event.target.matches('.ClickCommentReplyTooltip'))) {
+            } else if (event.target && (event.target.matches('.ClickCommentReplyTooltip'))) {
                 const footerElement = event.target.closest('.footer_row');
                 const showHideDivMain = footerElement.nextElementSibling && footerElement.nextElementSibling.matches('.show_hide_div_main') ? footerElement.nextElementSibling : null;
                 if (showHideDivMain.classList.contains('hide')) {
                     showHideDivMain.classList.remove("hide");
-                }
-                else {
+                } else {
                     showHideDivMain.classList.add("hide");
                 }
-            }
-            else if (event.target && (event.target.matches('.addReplyFromTooltip'))) {
+            } else if (event.target && (event.target.matches('.addReplyFromTooltip'))) {
                 const parent = event.target.closest('.attach_file');
                 const reply = parent.previousElementSibling.value;
                 const imageElement = parent.querySelector('.imageSrc');
@@ -541,24 +530,19 @@ const PdfViewerWithLayout = () => {
 
                 let AllReplys = '';
                 annotation[0].reply.forEach((item, key) => {
-
-                    AllReplys += `<div class="inner mt-1">
-                                        <div class="top_row">
-                                            <h3><span>UT</span>User Test</h3>
-                                            <p>${formatDate(item?.date)}</p>
-                                        </div>
-                                        <p>${item?.commentReply}</p>
-                                         ${(item?.imageUrl) ?
-                            `<p>
-                                                    <img src=" ${item?.imageUrl}" alt="">
-                                                   </p>`
-                            : ''}
-                                        <div class="footer_row">
-                                             <div class="cooment" data-id="${annotation[0].id}" data-key="${key}">
-                                                <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg">
-                                             </div>
-                                        </div>
-                                    </div>`;
+                    AllReplys+= `<div class="inner mt-1">
+                                    <div class="top_row">
+                                        <h3><span>UT</span>User Test</h3>
+                                        <p>${formatDate(item?.date)}</p>
+                                    </div>
+                                    <p>${item?.commentReply}</p>
+                                    ${(item?.imageUrl) ? `<p> <img src=" ${item?.imageUrl}" alt=""></p>` : ''}
+                                    <div class="footer_row">
+                                            <div class="cooment" data-id="${annotation[0].id}" data-key="${key}">
+                                            <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg">
+                                            </div>
+                                    </div>
+                                </div>`;
                 });
                 setCurrentReply('');
                 const replyContainer = event.target.closest('.show_hide_div_main').querySelector('.reply_container');
@@ -571,8 +555,7 @@ const PdfViewerWithLayout = () => {
                 const main_container = replyContainer.closest('.show_hide_div_main');
                 const like_reply_total_container = main_container.previousElementSibling;
                 like_reply_total_container.querySelector('.ClickCommentReplyTooltip').innerHTML = `${annotation[0].reply.length} reply`;
-            }
-            else if (event.target && (event.target.matches('.uploadPdfFile'))) {
+            } else if (event.target && (event.target.matches('.uploadPdfFile'))) {
                 event.target.addEventListener('change', (e) => {
                     const file = e.target.files[0]; // Get the selected file
                     if (file && file.type.startsWith('image/')) {
@@ -581,26 +564,21 @@ const PdfViewerWithLayout = () => {
                         const imageContainer = e.target.closest('.replyInputContainer').querySelector('.uploadedImage');
                         imageContainer.innerHTML = `<img class="imageSrc" src="${imageUrl}" alt="Image Preview" style="max-width: 15px;">`;
                         e.target.value = null
-                    } else {
                     }
                 });
-            }
-            else if (event.target && (event.target.matches('.commentLikeButton'))) {
+            } else if(event.target && (event.target.matches('.commentLikeButton'))) {
                 const commentLikeButtonContainer = event.target.closest('.commentLikeButtonContainer');
                 const commentId = commentLikeButtonContainer.getAttribute('data-id')
-                // console.log('sadsa');
-                // return;
+
                 handleLikeClick(commentId);
                 if (event.target.classList.contains('liked')) {
                     event.target.src = likeIcon;
                     event.target.classList.remove("liked");
-                }
-                else {
+                } else {
                     event.target.src = likedIcon;
                     event.target.classList.add("liked");
                 }
-            }
-            else if (event.target && (event.target.matches('.commentReplyImg'))) {
+            } else if (event.target && (event.target.matches('.commentReplyImg'))) {
                 const commentLikeImgContainer = event.target.closest('.cooment');
                 const replyKey = commentLikeImgContainer.getAttribute('data-key');
                 const commentId = commentLikeImgContainer.getAttribute('data-id');
@@ -609,8 +587,7 @@ const PdfViewerWithLayout = () => {
                 if (event.target.classList.contains('liked')) {
                     event.target.src = likeIcon;
                     event.target.classList.remove("liked");
-                }
-                else {
+                } else {
                     event.target.src = likedIcon;
                     event.target.classList.add("liked");
                     likeStatus = true;
@@ -635,7 +612,6 @@ const PdfViewerWithLayout = () => {
         };
 
         document.body.addEventListener('click', handleClick);
-        // const fileInput = document.querySelector('.image-upload');
         let callCount = 0; // Keep track of how many times the function has been called
         // Call the function to add tooltips after the PDF is loaded
         const startTimer = () => {
@@ -666,34 +642,14 @@ const PdfViewerWithLayout = () => {
                     <Viewer fileUrl={pdfUrl} plugins={[defaultLayout]} defaultScale={1.0} initialPage={initialPage} onZoom={(scale) => setScale(scale)} />
                 </Worker>
             </div>
-            <CommentSection
-                filteredAnnotations={filteredAnnotations}
-                handleFilterRecords={handleFilterRecords}
-                handleLikeClick={handleLikeClick}
-                handleReplyClick={handleReplyClick}
-                handleEditClick={handleEditClick}
-                handleDeleteComment={handleDeleteComment}
-                currentReply={currentReply}
-                setCurrentReply={setCurrentReply}
-                addCommentReply={addCommentReply}
-                showUsers={showUsers}
-                users={users}
-                assignedUser={assignedUser}
-                handleUserChange={handleUserChange}
-                getAssignedUser={getAssignedUser}
-                errors={errors}
-                handleResolveCheck={handleResolveCheck}
-                formatDate={formatDate}
-                handleCommentChange={handleCommentChange}
-                setShowUsers={setShowUsers}
-                newComment={newComment}
-                changeDocument={changeDocument}
-                imageSrc={imageSrc}
-                saveAnnotation={saveAnnotation}
-                editAbleComment={editAbleComment}
-                showInput={showInput}
-                updateAnnotation={updateAnnotation}
-                readyForReply={readyForReply}
+            <CommentSection filteredAnnotations={filteredAnnotations} handleFilterRecords={handleFilterRecords}
+                handleLikeClick={handleLikeClick} handleReplyClick={handleReplyClick} handleEditClick={handleEditClick}
+                handleDeleteComment={handleDeleteComment} currentReply={currentReply} setCurrentReply={setCurrentReply}
+                addCommentReply={addCommentReply} showUsers={showUsers} users={users} assignedUser={assignedUser}
+                handleUserChange={handleUserChange} getAssignedUser={getAssignedUser} errors={errors} handleResolveCheck={handleResolveCheck}
+                formatDate={formatDate} handleCommentChange={handleCommentChange} setShowUsers={setShowUsers} newComment={newComment} changeDocument={changeDocument}
+                imageSrc={imageSrc} saveAnnotation={saveAnnotation} editAbleComment={editAbleComment} showInput={showInput}
+                updateAnnotation={updateAnnotation} readyForReply={readyForReply}
             />
         </div>
     );
