@@ -10,7 +10,9 @@ const ReplySection = ({ comment, handleReplyClick, currentReply, setCurrentReply
         <>
             {(comment?.id != readyForReply) && (
                 <div className='flex items-center justify-between px-[10px] py-[10px] border-t border-[#ddd]'>
-                    <span onClick={() => { handleLikeClick(comment?.id) }} className='cursor-pointer'> {comment?.like ? <BiSolidLike /> : <BiLike />} </span>
+                    <span onClick={() => { handleLikeClick(comment?.id) }} className='cursor-pointer'> 
+                        {comment?.like ? <BiSolidLike /> : <BiLike />} 
+                    </span>
                     <span className='text-[12px] text-[#444] font-semibold cursor-pointer' onClick={() => handleReplyClick(comment?.id)}>
                         <span>{(comment?.reply) ? comment?.reply.length : '0'}</span> Reply
                     </span>
@@ -32,8 +34,13 @@ const ReplySection = ({ comment, handleReplyClick, currentReply, setCurrentReply
             {(comment?.id == readyForReply) && (
                 <CardFooter className='p-0 px-[10px] py-[10px]'>
                     <p className='flex gap-1'>
-                        <Input className='outline-none custom_reply' placeholder='Add Reply' value={currentReply} onChange={(e) => (setCurrentReply(e.target.value))} />
-                        <Button onClick={() => addCommentReply(comment?.id, null, null)} className="AddReply" value={comment?.id}>Add Reply</Button>
+                        <Input 
+                            className='outline-none custom_reply' placeholder='Add Reply' value={currentReply} 
+                            onChange={(e) => (setCurrentReply(e.target.value))} 
+                        />
+                        <Button onClick={() => addCommentReply(comment?.id, null, null)} className="AddReply" value={comment?.id}>
+                            Add Reply
+                        </Button>
                     </p>
                 </CardFooter>
             )}

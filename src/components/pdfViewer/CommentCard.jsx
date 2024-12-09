@@ -15,15 +15,7 @@ const CommentCard = ({ Key, comment, handleLikeClick, handleReplyClick, handleEd
                     <CardHeader className='p-[6px_8px]'>
                         <div className='flex items-center justify-between w-full'>
                             <form className='text-[12px] flex gap-1 items-center'>
-                                <Input
-                                    className=''
-                                    type="checkbox"
-                                    name="checkbox"
-                                    id=""
-                                    checked={comment?.status == '2'}
-                                    onChange={handleResolveCheck}
-                                    value={comment?.id}
-                                />
+                                <Input type="checkbox" name="checkbox"  checked={comment?.status == '2'} onChange={handleResolveCheck} value={comment?.id}/>
                                 <span className={`${comment.status === '2' && 'text-green-600'}`}>
                                     {comment?.status === '2' ? 'Resolved' : 'Resolve'}
                                 </span>
@@ -62,13 +54,8 @@ const CommentCard = ({ Key, comment, handleLikeClick, handleReplyClick, handleEd
                     </div>
                 </CardContent>
                 <ReplySection
-                    comment={comment}
-                    handleReplyClick={handleReplyClick}
-                    currentReply={currentReply}
-                    setCurrentReply={setCurrentReply}
-                    addCommentReply={addCommentReply}
-                    readyForReply={readyForReply}
-                    handleLikeClick={handleLikeClick}
+                    comment={comment} handleReplyClick={handleReplyClick} currentReply={currentReply} setCurrentReply={setCurrentReply}
+                    addCommentReply={addCommentReply} readyForReply={readyForReply} handleLikeClick={handleLikeClick}
                 />
             </Card>
         </div>

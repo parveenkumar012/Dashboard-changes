@@ -73,8 +73,7 @@ const PdfViewerWithLayout = () => {
     const filteredAnnotations = useMemo(() => {
         if (currentStatus) {
             return annotations.filter(annotation => annotation.status == currentStatus);
-        }
-        else {
+        } else {
             return annotations;
         }
     }, [annotations, currentStatus]);
@@ -102,8 +101,7 @@ const PdfViewerWithLayout = () => {
             if (showInput) {
                 await saveAnnotationsToPdf(updatedAnnotations, 1);
             }
-        }
-        else {
+        } else {
             setErrors({ ...errors, commentErr: 'Please add comment first' })
         }
     };
@@ -195,8 +193,7 @@ const PdfViewerWithLayout = () => {
             annotation[0].reply = [];
             annotation[0].reply[0] = { commentReply: commentReply, imageUrl: image, date: new Date().toLocaleDateString() };
             setAnnotations(annotations);
-        }
-        else {
+        } else {
             annotation[0].reply[total] = { commentReply: commentReply, imageUrl: image, date: new Date().toLocaleDateString() };
             setAnnotations(annotations);
         }
@@ -260,17 +257,16 @@ const PdfViewerWithLayout = () => {
 
                 let AllReplys = '';
                 annotation?.reply?.forEach((item, key) => {
-                    AllReplys += `<div class="inner mt-1">
+                    AllReplys+= `<div class="inner mt-1">
                                     <div class="top_row">
                                         <h3><span>UT</span>User Test</h3>
                                         <p>${formatDate(item?.date)}</p>
                                     </div>
                                     <p>${item?.commentReply}</p>
                                     ${(item?.imageUrl) ?
-                            `<p>
+                                    `<p>
                                         <img src=" ${item?.imageUrl}" alt="">
-                                        </p>`
-                            : ''}
+                                    </p>` : ''}
                                     <div class="footer_row">
                                         <div class="cooment" data-id="${annotation[0]?.id}" data-key="${key}">
                                             <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg">
@@ -281,55 +277,58 @@ const PdfViewerWithLayout = () => {
 
                 // Append the tooltip to the annotation icon
                 const tooltip = `<div class="custom-tooltip" style="position: absolute;top: -1px;right: 25px;padding: 5px;background-color: white;color: black;font-size: 12px;border-radius: 3px;z-index: 1000;display: none;" data-id="${annotation?.id}">
-                    <div class="inner_wraper">
-                        <div class="card_main">
-                            <div class="top_row">
-                                <h3><span>UT</span>User Test</h3>
-                                <p>${formatDate(annotation?.timestamp)}</p>
-                            </div>
-                            <p>${annotation?.comment}</p>
-                            <p> 
-                                <img src="${annotation?.imageUrl}" alt="" style={{ maxWidth: '20%', maxHeight: '20px' }}>
-                            </p>
-                            <button class="editComment" value="${annotation?.id}">
-                                <img src="${EditIcon}" alt="Edit" class="editCommentImg"/>
-                            </button> 
-                            <button class="deleteComment" value="${annotation?.id}">
-                                <img src="${DeleteIcon}" alt="Delete" class="DeleteCommentImg"/>
-                            </button>
-                            <div class="footer_row like_reply_total_container">
-                                <div class="commentLikeButtonContainer" data-id="${annotation?.id}">
-                                    <img src="${annotation?.like ? likedIcon : likeIcon}" alt="" class="commentLikeButton">
-                                </div>
-                                <div class="reply">
-                                    <p class="ClickCommentReplyTooltip" data-id="${annotation?.id}">${(annotation?.reply) ? annotation?.reply.length : '0'} reply</p>
-                                </div>
-                            </div>
-                            <div class="show_hide_div_main hide">
-                                <div class="show_hide_div reply_container" data-id="${annotation?.id}">
-                                    ${AllReplys}
-                                </div>
-                                <div class="show_hide_div">
-                                    <form action="">
-                                        <textarea name="" id="" class="toolTipReply"></textarea>
-                                        <div class="attach_file replyInputContainer">
-                                            <div class="attach-wrap ">
-                                                <i class="fa fa-paperclip" aria-hidden="true"></i>
-                                                <p>Attach files</p>
-                                                <input type="file" id="myFile" name="filename" class="uploadPdfFile" accept="image/*" >
+                                    <div class="inner_wraper">
+                                        <div class="card_main">
+                                            <div class="top_row">
+                                                <h3><span>UT</span>User Test</h3>
+                                                <p>${formatDate(annotation?.timestamp)}</p>
                                             </div>
-                                            <div class="uploadedImage">
+                                            <p>${annotation?.comment}</p>
+                                            <p> 
+                                                <img src="${annotation?.imageUrl}" alt="" style={{ maxWidth: '20%', maxHeight: '20px' }}>
+                                            </p>
+                                            <button class="editComment" value="${annotation?.id}">
+                                                <img src="${EditIcon}" alt="Edit" class="editCommentImg"/>
+                                            </button> 
+                                            <button class="deleteComment" value="${annotation?.id}">
+                                                <img src="${DeleteIcon}" alt="Delete" class="DeleteCommentImg"/>
+                                            </button>
+                                            <div class="footer_row like_reply_total_container">
+                                                <div class="commentLikeButtonContainer" data-id="${annotation?.id}">
+                                                    <img src="${annotation?.like ? likedIcon : likeIcon}" alt="" class="commentLikeButton">
+                                                </div>
+                                                <div class="reply">
+                                                    <p class="ClickCommentReplyTooltip" data-id="${annotation?.id}">${(annotation?.reply) ? annotation?.reply.length : '0'} reply</p>
+                                                </div>
                                             </div>
-                                            <button type="button" value="${annotation?.id}" class="addReplyFromTooltip">Add Reply</button>
+                                            <div class="show_hide_div_main hide">
+                                                <div class="show_hide_div reply_container" data-id="${annotation?.id}">
+                                                    ${AllReplys}
+                                                </div>
+                                                <div class="show_hide_div">
+                                                    <form action="">
+                                                        <textarea name="" id="" class="toolTipReply"></textarea>
+                                                        <div class="attach_file replyInputContainer">
+                                                            <div class="attach-wrap ">
+                                                                <i class="fa fa-paperclip" aria-hidden="true"></i>
+                                                                <p>Attach files</p>
+                                                                <input type="file" id="myFile" name="filename" class="uploadPdfFile" accept="image/*" >
+                                                            </div>
+                                                            <div class="uploadedImage">
+                                                            </div>
+                                                            <button type="button" value="${annotation?.id}" class="addReplyFromTooltip">Add Reply</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    </div>`;
+                                    </div>
+                                </div>`;
 
-                annotationCon.innerHTML = `<div class="msgIconContainer" data-id="${annotation?.id}" data-status="${annotation?.status}"><span class="messageText" data-id="${annotation?.id}">${annotationNumber}</span><img src="${MessageIcon}" class="message_icon" alt="Message" data-id="${annotation?.id}" /></div>${tooltip}`;
+                annotationCon.innerHTML =  `<div class="msgIconContainer" data-id="${annotation?.id}" data-status="${annotation?.status}">
+                                                <span class="messageText" data-id="${annotation?.id}">${annotationNumber}</span>
+                                                <img src="${MessageIcon}" class="message_icon" alt="Message" data-id="${annotation?.id}" />
+                                            </div>${tooltip}`;
 
             });
 
@@ -355,7 +354,6 @@ const PdfViewerWithLayout = () => {
     const handleResolveCheck = (e) => {
         const commentId = e.target.value;
         const checked = e.target.checked;
-        console.log(checked,commentId);
         const updatedAnnotations = annotations.map((item, key) => {
             if (item?.id == commentId) {
                 let resolve = null;
@@ -364,7 +362,6 @@ const PdfViewerWithLayout = () => {
             }
             return item;
         });
-        console.log(updatedAnnotations);
         // return;
         setAnnotations(updatedAnnotations);
     }
@@ -446,7 +443,6 @@ const PdfViewerWithLayout = () => {
                 return annotation;
             }
         });
-        // console.log('updatedAnnotations',updatedAnnotations);
         setAnnotations(updatedAnnotations);
     }
 
@@ -468,16 +464,13 @@ const PdfViewerWithLayout = () => {
                 const tooltip = msgIconContainer.nextElementSibling;
                 tooltip.style.display = 'block';
 
-            }
-            else if (event.target && (event.target.matches('.editCommentImg'))) {
+            } else if (event.target && (event.target.matches('.editCommentImg'))) {
                 const editable = event.target.closest('.editComment').value;
                 handleEditClick(editable)
-            }
-            else if (event.target && (event.target.matches('.DeleteCommentImg'))) {
+            } else if (event.target && (event.target.matches('.DeleteCommentImg'))) {
                 const deleteAble = event.target.closest('.deleteComment').value;
                 handleDeleteComment(deleteAble)
-            }
-            else if (event.target && (event.target.matches('.AddReply'))) {
+            } else if (event.target && (event.target.matches('.AddReply'))) {
                 const reply_containers = document.querySelectorAll('.reply_container');
                 reply_containers.forEach((replyContainer) => {
                     if (replyContainer.getAttribute('data-id') == event.target.value) {
