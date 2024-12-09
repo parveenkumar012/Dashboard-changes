@@ -1,36 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Viewer, Worker } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
-import { FaComment } from 'react-icons/fa'; // Comment icon
 import { PDFDocument, PDFName, PDFDict, PDFString } from 'pdf-lib'; // Import pdf-lib for PDF manipulation
 import test_pdf from '../assets/pdfs/test_pdf.pdf';
 import workerSrc from 'pdfjs-dist/build/pdf.worker.min.js';
-import { pdfjs } from 'react-pdf';
-import logoImage from '../assets/comment-icon.png';
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from './ui/button';
-import { PiSortDescendingLight } from "react-icons/pi";
-import profileIcon from "../assets/Frame 1000003152.png";
-import { CiChat2 } from "react-icons/ci";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input";
-import { FilterIcon, SearchCheckIcon, SearchIcon} from 'lucide-react';
+import commentIcon from '../assets/comment-icon.png';
+import likeIcon from "../assets/like.png";
+import likedIcon from "../assets/liked.png";
+import DeleteIcon from "../assets/delete.png";
+import EditIcon from "../assets/edit_button.png";
 import MessageIcon from "../assets/message-image.png";
-import { format, formatDistance, formatRelative, subDays,formatDistanceToNow } from 'date-fns'
-import { LuUserPlus } from "react-icons/lu";
-import ProductImage from "../assets/product_watch.jpeg";
-import { BiLike } from "react-icons/bi";
-import { RxExit } from "react-icons/rx";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import CommentSection from './pdfViewer/CommentSection';
 
 const PdfViewerWithLayout = () => {
     const defaultLayout = defaultLayoutPlugin();
@@ -39,28 +21,42 @@ const PdfViewerWithLayout = () => {
     const [showInput, setShowInput] = useState(false); // Control visibility of the comment input box
     const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 }); // Store the click position in PDF
     const [pdfUrl, setPdfUrl] = useState(test_pdf); // Path to the PDF file
-    const [scale, setScale] = useState(1); // To store and track the PDF scale factor
+    const [scale, setScale] = useState({scale: 1}); // To store and track the PDF scale factor
     const [readyForReply, setReadyForReply] = useState(null); // Text of the current comment
     const [currentReply, setCurrentReply] = useState(""); // Text of the current comment
-    const [currentPageIndex, setCurrentPageIndex] = useState(0);
-    const [hoveredAnnotation, setHoveredAnnotation] = useState(null);
-    const [annotationPositions, setAnnotationPositions] = useState([]);
-    const [initialPage,setInitialPage] = useState(0);
-    const viewerRef = useRef(null);
+    const [currentPageIndex, setCurrentPageIndex] = useState(0); //Clicked page index
+    const [initialPage, setInitialPage] = useState(0); //Page on screen after pdf load
+    const [users, setUsers] = useState([]); // all users
+    const [showUsers, setShowUsers] = useState(null); //just store the status that have to show users listing or not
+    const [assignedUser, setAssignedUser] = useState(null); // assign the user for comment
+    const [errors, setErrors] = useState({}); // capture errors
+    const [editAbleComment, setEditAbleComment] = useState(null); //store user curretly want to edit the comment
+    const [currentStatus, setCurrentStatus] = useState(null); // for capturing current status from showing all, open etc
+    const [imageSrc, setImageSrc] = useState(null); //set the image url when user select the image
+    let [count, setCount] = useState(0); // count comments
+    const addingCommentEventRef = useRef(false); //verify that currently user want to add or edit the comment 
 
     const handlePdfClick = (e) => {
         const pdfCanvas = e.target.closest('.rpv-core__text-layer');
         if (pdfCanvas) {
+
+            //if click of pdf close tooltip first
+            const tooltips = document.querySelectorAll('.custom-tooltip');
+            tooltips.forEach(tooltip => {
+                tooltip.style.display = 'none';
+            });
+
             const container = pdfCanvas.getBoundingClientRect();
             const testId = pdfCanvas.getAttribute('data-testid');
             const pageNumber = testId.split('-')[2];
+
             const x = e.clientX - container.left;
             const y = e.clientY - container.top;
 
             // Apply the scale factor to adjust the coordinates
-            const scaledX = x / scale;
-            const scaledY = y / scale;
-
+            const scaledX = x / scale.scale;
+            const scaledY = y / scale.scale;
+            
             // Set position for the input box to appear at clicked position
             setClickPosition({ x: scaledX, y: scaledY });
             setShowInput(true); // Show the comment input box
@@ -73,39 +69,60 @@ const PdfViewerWithLayout = () => {
         setNewComment(e.target.value);
     };
 
+
+    const filteredAnnotations = useMemo(() => {
+        if (currentStatus) {
+            return annotations.filter(annotation => annotation.status == currentStatus);
+        }
+        else {
+            return annotations;
+        }
+    }, [annotations, currentStatus]);
+
     // Save annotation (icon) and position when user submits it
     const saveAnnotation = async () => {
         if (newComment.trim()) {
             let updatedAnnotations;
-
+            count = count + 1;
             setAnnotations(prevAnnotations => {
-                updatedAnnotations = [...prevAnnotations,{ x: clickPosition.x, y: clickPosition.y, comment: newComment, pageIndex: currentPageIndex }];
+                updatedAnnotations = [...prevAnnotations, {
+                    id: count, x: clickPosition.x, y: clickPosition.y, comment: newComment, pageIndex: currentPageIndex, addToPdf: showInput, assignedUser: assignedUser, status: 1, imageUrl: imageSrc,
+                    timestamp: new Date().toLocaleDateString()
+                }];
                 return updatedAnnotations;
             });
 
+            setCount(count);
             setNewComment(''); // Clear the input after saving
             setShowInput(false); // Hide the input box
-            await saveAnnotationsToPdf(updatedAnnotations);
+            setAssignedUser(false);
+            setImageSrc(null);
+            setErrors({ ...errors, commentErr: '' })
+            addingCommentEventRef.current = true;
+            if (showInput) {
+                await saveAnnotationsToPdf(updatedAnnotations, 1);
+            }
+        }
+        else {
+            setErrors({ ...errors, commentErr: 'Please add comment first' })
         }
     };
 
-    const saveAnnotationsToPdf = async (annotations) => {
-        const pdfBytes = await fetch(pdfUrl).then((res) => res.arrayBuffer());
+    const saveAnnotationsToPdf = async (annotations, check) => {
+        let url = (check == 0) ? test_pdf : pdfUrl;
+        const pdfBytes = await fetch(url).then((res) => res.arrayBuffer());
         const pdfDoc = await PDFDocument.load(pdfBytes);
-        
-        const logoImageBytes = await fetch(logoImage).then((res) => res.arrayBuffer());
+
+        const logoImageBytes = await fetch(commentIcon).then((res) => res.arrayBuffer());
         const logo = await pdfDoc.embedPng(logoImageBytes);
         const logoDims = logo.scale(0.05); // Scale the logo
-        annotations.forEach((annotation,key) => {
-            if (!annotation.timestamp) {
-                // Add timestamp when saving the annotation
-                const timestamp = new Date().toLocaleString(); // You can customize the format if needed
-                annotation.timestamp = timestamp;
+        annotations.forEach((annotation, key) => {
+            if (!annotation.added && annotation.addToPdf == true) {
                 const page = pdfDoc.getPages()[annotation.pageIndex || 0]; // Get the page for annotation
-        
-                const scaledX = annotation.x * scale;
-                const scaledY = page.getHeight() - (annotation.y * scale); // Adjust Y for PDF coordinates
-        
+
+                const scaledX = annotation.x * scale.scale;
+                const scaledY = page.getHeight() - (annotation.y * scale.scale); // Adjust Y for PDF coordinates
+
                 // Create the popup annotation (tooltip)
                 const popupAnnotation = PDFDict.withContext(pdfDoc.context);
                 popupAnnotation.set(PDFName.of('Type'), PDFName.of('Annot'));
@@ -115,156 +132,511 @@ const PdfViewerWithLayout = () => {
                 ]));
                 popupAnnotation.set(PDFName.of('Contents'), PDFString.of(`${annotation.timestamp}\n${annotation.comment}`)); // Tooltip text with timestamp
                 popupAnnotation.set(PDFName.of('Name'), PDFName.of('Comment')); // Annotation name
-        
+
                 const annots = page.node.get(PDFName.of('Annots')) || pdfDoc.context.obj([]);
                 annots.push(popupAnnotation);
                 page.node.set(PDFName.of('Annots'), annots);
+                annotation.added = true;
             }
         });
-        
+
         const modifiedPdfBytes = await pdfDoc.save();
         const modifiedPdfUrl = URL.createObjectURL(new Blob([modifiedPdfBytes], { type: 'application/pdf' }));
-        
+
         // Update the PDF URL with annotations
         setPdfUrl(modifiedPdfUrl);
+
+        //set page index
+        setInitialPage(currentPageIndex);
+        setCurrentPageIndex(0);
     };
 
-    const clickComment = async (index) => {
-        setReadyForReply(index);
+    const formatDate = (dateString) => {
+        // Split the dateString in DD/MM/YYYY format
+        const [day, month, year] = dateString.split('/');
+        // Create a new Date object (months are 0-indexed in JavaScript)
+        const inputDate = new Date(year, month - 1, day);
+
+        // Get the current date
+        const currentDate = new Date();
+
+        // Calculate the time difference in milliseconds
+        const timeDifference = currentDate - inputDate;
+
+        // Convert milliseconds to days
+        const daysAgo = Math.floor(timeDifference / (1000 * 3600 * 24));
+
+        // Handle negative daysAgo (if the date is in the future)
+        if (daysAgo < 0) {
+            return "In the future";
+        }
+        // Return the result
+        if (daysAgo === 0) {
+            return "Today";
+        } else if (daysAgo === 1) {
+            return "1 day ago";
+        } else {
+            return `${daysAgo} days ago`;
+        }
+    }
+
+    //open the reply tab
+    const handleReplyClick = async (id) => {
+        setReadyForReply(id);
         setAnnotations(() => annotations);
     }
 
-    const addReply = (index) => {
-        let total = annotations[index]?.reply?.length;
+    const addCommentReply = async (id, reply, image) => {
+        const commentReply = (!reply) ? currentReply : reply;
+        const annotation = annotations.filter(annotation => annotation.id == id);
+        let total = annotation[0]?.reply?.length;
 
         if (!total) {
-            annotations[index].reply = [];
-            annotations[index].reply[0] = [currentReply];
+            annotation[0].reply = [];
+            annotation[0].reply[0] = { commentReply: commentReply, imageUrl: image, date: new Date().toLocaleDateString() };
             setAnnotations(annotations);
-            setCurrentReply('');
         }
         else {
-            annotations[index].reply[total] = [currentReply];
+            annotation[0].reply[total] = { commentReply: commentReply, imageUrl: image, date: new Date().toLocaleDateString() };
             setAnnotations(annotations);
-            setCurrentReply('');
+        }
+    }
+
+    //get user name by id
+    const getAssignedUser = (userId) => {
+        if (userId) {
+            const user = users.filter(user => user.id == userId);
+            return user[0].name;
         }
     }
 
     // Function to insert custom tooltips in the annotations
     const addTooltipsToAnnotations = async () => {
         const annotationIcons = document.querySelectorAll('.rpv-core__annotation-layer');
-        var count = 0;
+        let counting = 0;
+        let z_index = annotationIcons.length;
         annotationIcons.forEach((iconContainer, index) => {
+            const pageContainer = iconContainer.closest('.rpv-core__inner-page-container');
 
+            z_index = z_index - 1;
+            pageContainer.style.zIndex = z_index;
+            pageContainer.style.position = 'relative';
+
+            //remove all message icon first if exist
+            const msgIconContainer = iconContainer.querySelectorAll('.msgIconContainer');
+            if (msgIconContainer) {
+                if (addingCommentEventRef.current == false) {
+                    //hide all icons
+                    msgIconContainer.forEach(item => {
+                        item.innerHTML = '';
+                    });
+                }
+
+                // hide all tooltips
+                const tooltips = document.querySelectorAll('.custom-tooltip');
+                tooltips.forEach(tooltip => {
+                    tooltip.style.display = 'none';
+                });
+
+            }
             const dataTestId = iconContainer.getAttribute('data-testid');
             const dataId = dataTestId.charAt(dataTestId.length - 1);
-            const filteredAnnotations = annotations
-            .map((annotation, index) => ({ ...annotation, originalIndex: index }))  // Add the original index to each annotation
-            .filter(annotation => annotation.pageIndex == dataId);  // Filter by pageIndex
 
-            filteredAnnotations.forEach((annotation, mainIndex) => {
-                    const annotationElements = iconContainer.querySelectorAll('.rpv-core__annotation');
-                    const annotationElement = annotationElements[mainIndex];
-                    // console.log(annotationElement);
-                    const annotationCon = annotationElement.querySelector('.rpv-core__annotation-text-icon');
-                    const existingTooltip = annotationCon.querySelector('.custom-tooltip');
-                    if (existingTooltip) {
-                        // Tooltip already exists, no need to create a new one
-                        return;
-                    }
-                    const annotationNumber = parseInt(annotation.originalIndex, 10) + 1;
-                
-                    // Append the tooltip to the annotation icon
-                    const tooltip = `<div class="custom-tooltip" style="position: absolute;top: -1px;right: 25px;padding: 5px;background-color: white;color: black;font-size: 12px;border-radius: 3px;z-index: 1000;display: none;">
+            const AllfilteredAnnotations = filteredAnnotations
+                .map((annotation, index) => ({ ...annotation, originalIndex: index }))  // Add the original index to each annotation
+                .filter(annotation => annotation.pageIndex == dataId && annotation.addToPdf == true);  // Filter by pageIndex and annotation
+
+            AllfilteredAnnotations.forEach((annotation, mainIndex) => {
+                const annotationElements = iconContainer.querySelectorAll('.rpv-core__annotation');
+                const annotationElement = annotationElements[mainIndex];
+                const annotationCon = annotationElement.querySelector('.rpv-core__annotation-text-icon');
+                const exitMsgIconContainer = annotationCon.querySelector('.msgIconContainer');
+                if (exitMsgIconContainer && exitMsgIconContainer.innerHTML.trim() != '') {
+                    // Tooltip already exists, no need to create a new one
+                    return;
+                }
+                counting = counting + 1;
+                const annotationNumber = parseInt(annotation.originalIndex, 10) + 1;
+
+                let AllReplys = '';
+                annotation?.reply?.forEach((item, key) => {
+                    AllReplys += `<div class="inner mt-1">
+                                    <div class="top_row">
+                                        <h3><span>UT</span>User Test</h3>
+                                        <p>${formatDate(item?.date)}</p>
+                                    </div>
+                                    <p>${item?.commentReply}</p>
+                                    ${(item?.imageUrl) ?
+                            `<p>
+                                        <img src=" ${item?.imageUrl}" alt="">
+                                        </p>`
+                            : ''}
+                                    <div class="footer_row">
+                                        <div class="cooment" data-id="${annotation[0]?.id}" data-key="${key}">
+                                            <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg">
+                                        </div>
+                                    </div>
+                                </div>`;
+                });
+
+                // Append the tooltip to the annotation icon
+                const tooltip = `<div class="custom-tooltip" style="position: absolute;top: -1px;right: 25px;padding: 5px;background-color: white;color: black;font-size: 12px;border-radius: 3px;z-index: 1000;display: none;" data-id="${annotation?.id}">
                     <div class="inner_wraper">
                         <div class="card_main">
                             <div class="top_row">
-                                <h3><span>PM</span>Product Managar</h3>
-                                <p>5 month ago</p>
+                                <h3><span>UT</span>User Test</h3>
+                                <p>${formatDate(annotation?.timestamp)}</p>
                             </div>
                             <p>${annotation?.comment}</p>
-                            <div class="footer_row">
-                                <div class="cooment">
-                                    <img src="src/assets/Frame 1000003152.png" alt="">
+                            <p> 
+                                <img src="${annotation?.imageUrl}" alt="" style={{ maxWidth: '20%', maxHeight: '20px' }}>
+                            </p>
+                            <button class="editComment" value="${annotation?.id}">
+                                <img src="${EditIcon}" alt="Edit" class="editCommentImg"/>
+                            </button> 
+                            <button class="deleteComment" value="${annotation?.id}">
+                                <img src="${DeleteIcon}" alt="Delete" class="DeleteCommentImg"/>
+                            </button>
+                            <div class="footer_row like_reply_total_container">
+                                <div class="commentLikeButtonContainer" data-id="${annotation?.id}">
+                                    <img src="${annotation?.like ? likedIcon : likeIcon}" alt="" class="commentLikeButton">
                                 </div>
                                 <div class="reply">
-                                    <p>0 reply</p>
+                                    <p class="ClickCommentReplyTooltip" data-id="${annotation?.id}">${(annotation?.reply) ? annotation?.reply.length : '0'} reply</p>
                                 </div>
                             </div>
-                            <div class="show_hide_div">
-                                <div class="inner">
-                                <div class="top_row">
-                                    <h3><span>PM</span>Product Managar</h3>
-                                    <p>5 month ago</p>
+                            <div class="show_hide_div_main hide">
+                                <div class="show_hide_div reply_container" data-id="${annotation?.id}">
+                                    ${AllReplys}
                                 </div>
-                                <p>See attached</p>
-                                <div class="footer_row">
-                                    <div class="cooment">
-                                        <img src="src/assets/Frame 1000003152.png" alt="">
-                                    </div>
-                                </div>
-                            </div>
-                                <form action="">
-                                    <textarea name="" id=""></textarea>
-                                    <div class="attach_file">
-                                        <div class="attach-wrap">
-                                            <i class="fa fa-paperclip" aria-hidden="true"></i>
-                                            <p>Attach files</p>
-                                            <input type="file" id="myFile" name="filename">
+                                <div class="show_hide_div">
+                                    <form action="">
+                                        <textarea name="" id="" class="toolTipReply"></textarea>
+                                        <div class="attach_file replyInputContainer">
+                                            <div class="attach-wrap ">
+                                                <i class="fa fa-paperclip" aria-hidden="true"></i>
+                                                <p>Attach files</p>
+                                                <input type="file" id="myFile" name="filename" class="uploadPdfFile" accept="image/*" >
+                                            </div>
+                                            <div class="uploadedImage">
+                                            </div>
+                                            <button type="button" value="${annotation?.id}" class="addReplyFromTooltip">Add Reply</button>
                                         </div>
-                                        <button type="button">Add Comment</button>
-                                        
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                     </div>`;
 
-                    annotationCon.innerHTML = `<div class="msgIconContainer" data-id="${annotationNumber}"><span class="messageText" data-id="${annotationNumber}">${annotationNumber}</span><img src="${MessageIcon}" class="message_icon" alt="Message" data-id="${annotationNumber}" /></div>${tooltip}`;
+                annotationCon.innerHTML = `<div class="msgIconContainer" data-id="${annotation?.id}" data-status="${annotation?.status}"><span class="messageText" data-id="${annotation?.id}">${annotationNumber}</span><img src="${MessageIcon}" class="message_icon" alt="Message" data-id="${annotation?.id}" /></div>${tooltip}`;
 
-                    // Hide tooltip on mouse out
-                    annotationCon.addEventListener('mouseleave', () => {
-                        const tooltip = annotationCon.querySelector('.custom-tooltip');
-                        tooltip.style.display = 'none'; // Add your desired style
-                    });
-    
-                    // Show tooltip on mouse hover
-                    annotationCon.addEventListener('mouseenter', () => {
-                        const tooltip = annotationCon.querySelector('.custom-tooltip');
-                        tooltip.style.display = 'block'; // Add your desired style
-                    });
             });
+
         });
-    };
-        
-    const handleCommentClick = (key) => {
-        const annotation = annotations[key];
-        const inputElement = document.querySelector('.rpv-core__textbox[data-testid="page-navigation__current-page-input"]');
-        if (inputElement) {
-            console.log(annotation.pageIndex+1);
-            inputElement.value = annotation.pageIndex; // Set the value to the desired page number
+    }
+
+    //set all users
+    const addMembers = () => {
+        const AllUsers = [
+            { id: 1, name: 'Test User' },
+            { id: 2, name: 'Test User2' },
+            { id: 3, name: 'Test User3' },
+            { id: 4, name: 'Test User4' },
+        ];
+        setUsers(AllUsers);
+    }
+
+    const handleUserChange = (e) => {
+        setAssignedUser(e.target.value);
+        setShowUsers(false);
+    }
+
+    const handleResolveCheck = (e) => {
+        const commentId = e.target.value;
+        const checked = e.target.checked;
+        console.log(checked,commentId);
+        const updatedAnnotations = annotations.map((item, key) => {
+            if (item?.id == commentId) {
+                let resolve = null;
+                if (checked == true) { resolve = 2; } else { resolve = 1; }
+                return { ...item, status: resolve }
+            }
+            return item;
+        });
+        console.log(updatedAnnotations);
+        // return;
+        setAnnotations(updatedAnnotations);
+    }
+
+    const handleDeleteComment = async (id) => {
+        const filteredAnnotations = annotations
+            .map((annotation, index) => ({ ...annotation, added: null }))
+            .filter(annotation => annotation.id != id);
+
+        setAnnotations(filteredAnnotations);
+        await saveAnnotationsToPdf(filteredAnnotations, 0);
+    }
+
+    const handleEditClick = async (id) => {
+        setEditAbleComment(id);
+        const annotation = annotations.filter(annotation => annotation.id == id);
+        setNewComment(annotation[0].comment);
+    }
+
+    const updateAnnotation = async () => {
+        if (newComment.trim()) {
+            const updatedAnnotations = annotations.map((item, key) => {
+                if (item.id == editAbleComment) {
+                    return { ...item, comment: newComment, imageUrl: imageSrc, timestamp: new Date().toLocaleDateString() }
+                }
+                return item;
+            });
+
+            addingCommentEventRef.current = true;
+            setAnnotations(updatedAnnotations);
+            await saveAnnotationsToPdf(updatedAnnotations, 1);
+
+            setNewComment(''); // Clear the input after saving
+            setShowInput(false); // Hide the input box
+            setAssignedUser(false);
+            setEditAbleComment(null);
+            setImageSrc(null);
+            setErrors({ ...errors, commentErr: '' })
         }
-
-    }
-    const formatDate = (dateString) => {
-        console.log(dateString);
-        const inputDate = new Date(dateString);
-        return `${formatDistanceToNow(inputDate)} ago`;
+        else {
+            setErrors({ ...errors, commentErr: 'Please add comment first' })
+        }
     }
 
-    // rpv-core__annotation-text-icon
-    useEffect(() => {       
-        const handleClick = (event) => {
+    const handleFilterRecords = async (e) => {
+        let num = e.target.value;
+        if (num == 0) {
+            setCurrentStatus(null);
+            return;
+        }
+        setCurrentStatus(num);
+        addingCommentEventRef.current = false;
+    }
+
+    const changeDocument = async (e) => {
+        const file = e.target.files[0];
+
+        if (file && file.type.startsWith('image/')) {
+            const imageUrl = URL.createObjectURL(file);  // Create a URL for the uploaded image
+            setImageSrc(imageUrl);
+            e.target.value = null;
+        } else {
+            alert('Please upload a valid image file.');
+        }
+    }
+
+    const handleLikeClick = async (id) => {
+
+        const updatedAnnotations = annotations.map((annotation) => {
+            if (annotation.id == id) {
+                if (annotation.like == true) {
+                    // return { ...annotation, like: false };
+                    annotation.like = false;
+                    return annotation;
+                }   
+                else {
+                    // return { ...annotation, like: true };
+                    annotation.like = true;
+                    return annotation;
+                }
+            }
+            else {
+                return annotation;
+            }
+        });
+        // console.log('updatedAnnotations',updatedAnnotations);
+        setAnnotations(updatedAnnotations);
+    }
+
+    useEffect(() => {
+        addMembers();
+
+        const handleClick = async (event) => {
             if (event.target && (event.target.matches('.message_icon') || event.target.matches('.messageText'))) {
                 const dataId = event.target.dataset.id;
-                setReadyForReply(dataId-1);
+                setReadyForReply(dataId);
+
+                //firstly close all others tooltips 
+                const tooltips = document.querySelectorAll('.custom-tooltip');
+                tooltips.forEach(tooltip => {
+                    tooltip.style.display = 'none';
+                });
+
+                const msgIconContainer = event.target.closest('.msgIconContainer');
+                const tooltip = msgIconContainer.nextElementSibling;
+                tooltip.style.display = 'block';
+
             }
+            else if (event.target && (event.target.matches('.editCommentImg'))) {
+                const editable = event.target.closest('.editComment').value;
+                handleEditClick(editable)
+            }
+            else if (event.target && (event.target.matches('.DeleteCommentImg'))) {
+                const deleteAble = event.target.closest('.deleteComment').value;
+                handleDeleteComment(deleteAble)
+            }
+            else if (event.target && (event.target.matches('.AddReply'))) {
+                const reply_containers = document.querySelectorAll('.reply_container');
+                reply_containers.forEach((replyContainer) => {
+                    if (replyContainer.getAttribute('data-id') == event.target.value) {
+                        const annotation = annotations.filter(annotation => annotation.id == event.target.value);
+                        let AllReplys = '';
+                        annotation[0].reply.forEach((item, key) => {
+
+                            AllReplys += `<div class="inner mt-1">
+                                            <div class="top_row">
+                                                <h3><span>UT</span>User Test</h3>
+                                                <p>${formatDate(item?.date)}</p>
+                                            </div>
+                                            <p>${item?.commentReply}</p>
+                                            ${(item?.imageUrl) ?
+                                    `<p>
+                                                <img src=" ${item?.imageUrl}" alt="">
+                                                </p>`
+                                    : ''}
+                                            <div class="footer_row">
+                                                <div class="cooment" data-id="${annotation[0]?.id}" data-key="${key}">
+                                                    <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg">
+                                                </div>
+                                            </div>
+                                        </div>`;
+                        });
+                        setCurrentReply('');
+                        replyContainer.innerHTML = AllReplys;
+
+                        //update reply count in tooltip
+                        const main_container = replyContainer.closest('.show_hide_div_main');
+                        const like_reply_total_container = main_container.previousElementSibling;
+                        like_reply_total_container.querySelector('.ClickCommentReplyTooltip').innerHTML = `${annotation[0].reply.length} reply`;
+                    }
+                });
+            }
+            else if (event.target && (event.target.matches('.ClickCommentReplyTooltip'))) {
+                const footerElement = event.target.closest('.footer_row');
+                const showHideDivMain = footerElement.nextElementSibling && footerElement.nextElementSibling.matches('.show_hide_div_main') ? footerElement.nextElementSibling : null;
+                if (showHideDivMain.classList.contains('hide')) {
+                    showHideDivMain.classList.remove("hide");
+                }
+                else {
+                    showHideDivMain.classList.add("hide");
+                }
+            }
+            else if (event.target && (event.target.matches('.addReplyFromTooltip'))) {
+                const parent = event.target.closest('.attach_file');
+                const reply = parent.previousElementSibling.value;
+                const imageElement = parent.querySelector('.imageSrc');
+                let imageSrc = null;
+                if (imageElement) {
+                    imageSrc = imageElement.src
+                }
+                setCurrentReply(reply);
+                await addCommentReply(event.target.value, reply, imageSrc);
+                const annotation = annotations.filter(annotation => annotation.id == event.target.value);
+
+                let AllReplys = '';
+                annotation[0].reply.forEach((item, key) => {
+
+                    AllReplys += `<div class="inner mt-1">
+                                        <div class="top_row">
+                                            <h3><span>UT</span>User Test</h3>
+                                            <p>${formatDate(item?.date)}</p>
+                                        </div>
+                                        <p>${item?.commentReply}</p>
+                                         ${(item?.imageUrl) ?
+                            `<p>
+                                                    <img src=" ${item?.imageUrl}" alt="">
+                                                   </p>`
+                            : ''}
+                                        <div class="footer_row">
+                                             <div class="cooment" data-id="${annotation[0].id}" data-key="${key}">
+                                                <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg">
+                                             </div>
+                                        </div>
+                                    </div>`;
+                });
+                setCurrentReply('');
+                const replyContainer = event.target.closest('.show_hide_div_main').querySelector('.reply_container');
+                replyContainer.innerHTML = AllReplys;
+
+                parent.previousElementSibling.value = '';
+                parent.querySelector('.uploadedImage').innerHTML = '';
+
+                //update reply count in tooltip
+                const main_container = replyContainer.closest('.show_hide_div_main');
+                const like_reply_total_container = main_container.previousElementSibling;
+                like_reply_total_container.querySelector('.ClickCommentReplyTooltip').innerHTML = `${annotation[0].reply.length} reply`;
+            }
+            else if (event.target && (event.target.matches('.uploadPdfFile'))) {
+                event.target.addEventListener('change', (e) => {
+                    const file = e.target.files[0]; // Get the selected file
+                    if (file && file.type.startsWith('image/')) {
+                        // Create an object URL for the selected image file
+                        const imageUrl = URL.createObjectURL(file);
+                        const imageContainer = e.target.closest('.replyInputContainer').querySelector('.uploadedImage');
+                        imageContainer.innerHTML = `<img class="imageSrc" src="${imageUrl}" alt="Image Preview" style="max-width: 15px;">`;
+                        e.target.value = null
+                    } else {
+                    }
+                });
+            }
+            else if (event.target && (event.target.matches('.commentLikeButton'))) {
+                const commentLikeButtonContainer = event.target.closest('.commentLikeButtonContainer');
+                const commentId = commentLikeButtonContainer.getAttribute('data-id')
+                // console.log('sadsa');
+                // return;
+                handleLikeClick(commentId);
+                if (event.target.classList.contains('liked')) {
+                    event.target.src = likeIcon;
+                    event.target.classList.remove("liked");
+                }
+                else {
+                    event.target.src = likedIcon;
+                    event.target.classList.add("liked");
+                }
+            }
+            else if (event.target && (event.target.matches('.commentReplyImg'))) {
+                const commentLikeImgContainer = event.target.closest('.cooment');
+                const replyKey = commentLikeImgContainer.getAttribute('data-key');
+                const commentId = commentLikeImgContainer.getAttribute('data-id');
+
+                let likeStatus = false;
+                if (event.target.classList.contains('liked')) {
+                    event.target.src = likeIcon;
+                    event.target.classList.remove("liked");
+                }
+                else {
+                    event.target.src = likedIcon;
+                    event.target.classList.add("liked");
+                    likeStatus = true;
+                }
+
+                const updatedAnnotations = annotations.map((item, mainkey) => {
+                    if (item.id == commentId) {
+                        item.reply = item.reply.map((reply, key) => {
+                            if (key == replyKey) {
+                                return { ...reply, like: likeStatus };
+                            }
+                            return reply;
+                        });
+                        return item;
+                    } else {
+                        return item;
+                    }
+                });
+                setAnnotations(updatedAnnotations);
+            }
+
         };
+
         document.body.addEventListener('click', handleClick);
-
+        // const fileInput = document.querySelector('.image-upload');
         let callCount = 0; // Keep track of how many times the function has been called
-
         // Call the function to add tooltips after the PDF is loaded
         const startTimer = () => {
             const timer = setInterval(() => {
@@ -279,162 +651,50 @@ const PdfViewerWithLayout = () => {
                     }
                 }
             }, 1000);
-        };     
-        startTimer();   
+        };
+        startTimer();
 
         return () => {
             document.body.removeEventListener('click', handleClick);
         }
-    }, [pdfUrl]);
+    }, [pdfUrl, currentStatus]);
 
     return (
-        <div className='flex lg:h-[100vh] lg:flex-nowrap flex-wrap lg:max-h-none max-h-[100vh] lg:overflow-y-hidden overflow-y-auto'>
+        <div className='flex lg:h-[100vh] lg:flex-nowrap flex-wrap lg:max-h-none max-h-[100vh] lg:overflow-y-hidden overflow-y-auto bg-[#f3f4f6]'>
             <div className='relative w-full lg:max-w-[calc(100%-350px)] max-w-[100%]' onClick={handlePdfClick}>
-                <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`}>
-                    <Viewer
-                        fileUrl={pdfUrl}
-                        plugins={[defaultLayout]}
-                        defaultScale={1.0}
-                        initialPage={initialPage}
-                        onZoom={(scale) => setScale(scale)} // Track the zoom scale
-                    />
+                <Worker workerUrl={workerSrc}>
+                    <Viewer fileUrl={pdfUrl} plugins={[defaultLayout]} defaultScale={1.0} initialPage={initialPage} onZoom={(scale) => setScale(scale)} />
                 </Worker>
             </div>
-            {/* Show comment input box when clicked */}
-            <div className='py-8 px-0 w-full lg:max-w-[350px] max-w-[100%] border-[#ccc] border-left-1 overflow-y-auto bg-[#f3f4f6] lg:mt-[0px] mt-[30px]'>
-                <h3 className='text-[14px] font-semibold mb-5 text-[#1B1B1B] flex justify-between items-center w-full border-b border-[#ddd] px-[17px] pb-[15px]'> Comment <span className='rotate-180 text-[20px]'> <RxExit /> </span> </h3>
-                <div className='relative'>
-                    {/* <input type="search" placeholder='Type to search' className='border-[#ccc] caret-none border rounded-md w-full h-10 ps-10 pe-2 text-base text-[#1b1b1b] focus:ring-none focus:outline-none pr-4' />
-                    <SearchIcon className='absolute  top-[7px] left-[10px]' /> */}
-
-                </div>
-                <div className='flex border-b border-[#f8f8f8] my-4 gap-8 items-center px-[17px]'>
-                    <select className='custom-select-box bg-white p-[8px_18px] ring-0 outline-[0] appearance-none rounded-md' name="" id="">
-                        <option value="">Showing All</option>
-                        <option value="">Open</option>
-                        <option value="">Resolved</option>
-                    </select>
-                </div>
-                {annotations.length === 0 && <p className='px-[17px] text-center'>No Comments yet.</p>}
-                {
-                    annotations.map((comment, key) =>
-                        <div className='px-[17px] mb-3'>
-                        <Card className='custm_card overflow-hidden' >
-                            <CardHeader className='p-[6px_8px]'>
-                            <div className='flex items-center justify-between w-full'>
-                                <form className='text-[12px] flex gap-1 items-center' action="">
-                                    <input className='' type="checkbox" name="" id="" />
-                                    Resolve
-                                </form>
-                                <p className='text-[12px]'>Assigned to  <span className='font-semibold'>Test User</span></p>
-                            </div>
-                            </CardHeader>
-                            <CardContent className='px-[10px] pt-3 text-[#1b1b1b]'>
-                                <div className='flex justify-between items-center p-[4px_0px]'>
-                                    <div className='mb-0'>
-                                        {/* <img src={profileIcon} className='w-full h-full' alt="" /> */}
-                                        <div className='flex items-center text-[12px]'>
-                                            <span className='relative mr-2' onClick={()=>{handleCommentClick(key)}}>
-                                                {/* <CiChat2 size={25}/> */}
-                                                <img src={MessageIcon} alt="Message" className='w-[22px]'/>
-                                                <span className='flex gap-2 absolute text-[#0E00FF] top-[1px] left-[8px]'>{key + 1}</span>
-                                            </span>
-                                           <span className='font-bold'>User Test</span>
-                                        </div>
-                                    </div>
-                                    <div className='flex gap-2 mt-0'>
-                                        <div className='flex items-center text-[12px]'>
-                                            {/* <span className='relative mr-2' onClick={()=>{handleCommentClick(key)}}><CiChat2 size={25}/><span className='flex gap-2 absolute text-[8px] top-[5px] left-[11px]'>{key + 1}</span></span> */}
-                                            <span> <span className='text-[12px] text-[#1b1b1b] opacity-50 m-1'>2d Ago</span></span>
-                                            <p><BsThreeDotsVertical /></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p className='text-left text-sm pt-[30px] pb-[40px]'>{comment?.comment}</p>
-                                <div>
-                                    <img className='w-full max-w-[150px]' src={ProductImage} alt="product" />
-                                </div>
-                                {comment?.reply?.map((message) =>
-                                    <div>
-                                        <div className='flex gap-2 pt-4 mb-1'>
-                                            <div className='flex items-center'>
-                                                <div className='size-7'>
-                                                    <img src={profileIcon} className='w-full h-full' alt="" />
-                                                </div>
-                                                <span> <span className='font-bold'>User Test</span> <span className='text-[12px] text-[#1b1b1b] opacity-50 m-1'>2d ago</span> </span>
-                                            </div>
-                                        </div>
-                                        <p className='text-left text-sm pt-[20px] pb-[40px]'>{message}</p>
-                                    </div>
-                                )}
-                                {/* {comment?.reply && (
-                                    <div>
-                                        <div className='size-7'>
-                                                <img src={profileIcon} className='w-full h-full' alt="" />
-                                            </div>
-                                        <div className='flex gap-2 pt-4 mb-1'>
-                                            <div className='flex items-center'>
-                                                <span> <span className='font-bold'>User Test</span> <span className='text-[12px] text-[#1b1b1b] opacity-50 m-1'>2d ago</span> </span>
-                                            </div>
-                                        </div>
-                                      
-                                    </div>
-                                )} */}
-                            </CardContent>
-                            {
-                                (key != readyForReply) && (
-                                    <div className='flex items-center justify-between px-[10px] py-[10px] border-t border-[#ddd]'>
-                                        {/* <img src="" alt="" /> */}
-                                        <BiLike />
-                                    {/* <Button  onClick={() => clickComment(key)} >Reply</Button> */}
-                                    <button className='text-[12px] text-[#444] font-semibold' onClick={() => clickComment(key)}><span>0</span> Reply </button>
-                                   </div>
-                                )
-                            }
-                            {(key == readyForReply) && (
-                                <CardFooter className='p-0 px-[10px] py-[10px]'>
-                                    <p className='flex gap-1'>
-                                        <Input className='outline-none' placeholder='Add Reply' value={currentReply} onChange={(e) => (setCurrentReply(e.target.value))} />
-                                        <Button onClick={() => addReply(key)}>Add Reply</Button>
-                                    </p>
-                                </CardFooter>
-                            )
-                            }
-                        </Card>
-                        </div>
-                    )
-                }
-                    <div className='w-full fixed lg:max-w-[330px] max-w-[280px] bg-white bottom-[0px] pb-[15px] right-[10px] '>
-                        {showInput && (
-                        <div className='px-[10px] pb-[10px]'>
-                            <div className='py-[15px] text-[14px] flex items-center gap-[20px]'>
-                                <p>Add Comment</p>
-                                <p className='flex flex-1 items-center gap-2 text-[14px]'><button className='max-w-[30px] h-[30px] w-full flex justify-center items-center shadow-lg rounded-full'><LuUserPlus /></button>No Assignee</p>
-                            </div>
-                            <div className='border border-[#ddd] rounded-[4px]'>
-                            <form action="">
-                            <Textarea
-                                value={newComment}
-                                onChange={handleCommentChange}
-                                placeholder="Enter your comment"
-                                rows="2"
-                                className='w-full border-0 focus:outline-none focus-visible:outline-none focus-visible:ring-[0] resize-none custm_textar'
-                            />
-                               <div className='flex items-center justify-between border-t border-[#ddd] px-[12px] py-[10px]'>
-                                <div className='flex items-center relative gap-2 bg-[#d4d4d454] p-[6px_10px] rounded-full'>
-                                <i class="fa fa-paperclip text-[#444]" aria-hidden="true"></i>
-                                <p className='text-[#444] text-[12px]'>Attach files</p>
-                                <input className='absolute top-0 left-0 w-full opacity-0 cursor-pointer z-10' type="file" id="myFile" name="filename" />
-                                </div>
-                            <Button className='mt-0 bg-[#0000ff85] text-[12px]' onClick={saveAnnotation}>Add Comment</Button>
-                               </div>
-                            </form>
-                            </div>
-                            </div>
-                           
-                            )}
-                    </div>
-            </div>
+            <CommentSection
+                filteredAnnotations={filteredAnnotations}
+                handleFilterRecords={handleFilterRecords}
+                handleLikeClick={handleLikeClick}
+                handleReplyClick={handleReplyClick}
+                handleEditClick={handleEditClick}
+                handleDeleteComment={handleDeleteComment}
+                currentReply={currentReply}
+                setCurrentReply={setCurrentReply}
+                addCommentReply={addCommentReply}
+                showUsers={showUsers}
+                users={users}
+                assignedUser={assignedUser}
+                handleUserChange={handleUserChange}
+                getAssignedUser={getAssignedUser}
+                errors={errors}
+                handleResolveCheck={handleResolveCheck}
+                formatDate={formatDate}
+                handleCommentChange={handleCommentChange}
+                setShowUsers={setShowUsers}
+                newComment={newComment}
+                changeDocument={changeDocument}
+                imageSrc={imageSrc}
+                saveAnnotation={saveAnnotation}
+                editAbleComment={editAbleComment}
+                showInput={showInput}
+                updateAnnotation={updateAnnotation}
+                readyForReply={readyForReply}
+            />
         </div>
     );
 };

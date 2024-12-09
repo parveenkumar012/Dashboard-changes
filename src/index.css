@@ -260,6 +260,35 @@ span.messageText {
   color: #0E00FF;
 }
 
-.template:hover img {
-  filter:invert(1) brightness(100%);
+.right_side-bar {
+  max-height: calc(100vh - 214px);
+}
+.show_hide_div_main.hide {
+  display: none;
+}
+@media (max-width:1023px){
+  .right_side-bar {
+    max-height: inherit;
+  }
+  
+}
+.msgIconContainer, p.ClickCommentReplyTooltip , .commentReplyImg , .commentLikeButton{
+  cursor: pointer;
+}
+.custom-tooltip button.editComment{
+  margin-right: 5px;
+}
+.custom-tooltip button.editComment, .custom-tooltip button.deleteComment  {
+  font-size: 14px;
+  color: #000;
+}
+.custom-tooltip button.editComment:hover, .custom-tooltip button.deleteComment:hover  {
+  text-decoration: underline;
+}
+img.editCommentImg {max-width: 15px;max-height: 20px;}
+
+img.DeleteCommentImg{max-width: 15px;max-height: 20px;}
+
+.custom-tooltip .card_main p img {
+  max-width: 110px;
 }
