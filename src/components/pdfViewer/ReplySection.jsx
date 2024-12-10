@@ -3,14 +3,13 @@ import { CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { BiLike } from "react-icons/bi";
 import { BiSolidLike } from "react-icons/bi";
-import profileIcon from "../../assets/Frame 1000003152.png";
 
-const ReplySection = ({ comment, handleReplyClick, currentReply, setCurrentReply, addCommentReply, readyForReply, handleLikeClick }) => {
+const ReplySection = ({ comment, handleReplyClick, currentReply, setCurrentReply, addCommentReply, readyForReply, handleLikeClick,handleReplyLikeClick,formatDate }) => {
     return (
         <>
             {(comment?.id != readyForReply) && (
                 <div className='flex items-center justify-between px-[10px] py-[10px] border-t border-[#ddd]'>
-                    <span onClick={() => { handleLikeClick(comment?.id) }} className='cursor-pointer'> 
+                    <span onClick={() => { handleLikeClick(comment?.id) }} className='cursor-pointer text-[19px]'> 
                         {comment?.like ? <BiSolidLike /> : <BiLike />} 
                     </span>
                     <span className='text-[12px] text-[#444] font-semibold cursor-pointer' onClick={() => handleReplyClick(comment?.id)}>
@@ -19,16 +18,21 @@ const ReplySection = ({ comment, handleReplyClick, currentReply, setCurrentReply
                 </div>
             )}
             {comment?.reply?.map((message, key) => (
-                <div key={key}>
-                    <div className='flex gap-2 pt-4 mb-1'>
-                        <div className='flex items-center gap-2'>
-                            <div className='size-7'>
-                                <img src={profileIcon} className='w-full h-full' alt="" />
+                <div className="px-[10px] mb-3" key={key}>
+                    <div className=" pl-5 border-l border-l-[#444]">
+                        <div className='flex gap-2 pt-4 mb-1 w-full'>
+                            <div className='flex items-center gap-2 w-full'>
+                                <div class="text-[10px] top_row flex items-center justify-between w-full">
+                                    <h3 className="flex text-[10px] items-center gap-1" ><span className="w-[25px] h-[25px] bg-[#0000ff85] flex justify-center items-center rounded-full text-white text-[10px]">UT</span>User Test</h3>
+                                    <p>{formatDate(message?.date)}</p>
+                                </div>
                             </div>
-                            <span> <span className='font-bold text-[14px]'>User Test</span> </span>
                         </div>
+                        <p className='text-left text-sm pt-[6px] pb-[8px]'>{message?.commentReply}</p>
+                        <span onClick={() => { handleReplyLikeClick(comment?.id,key,message?.like) }} className='cursor-pointer text-[18px]'> 
+                                    {message?.like ? <BiSolidLike /> : <BiLike />} 
+                        </span>
                     </div>
-                    <p className='text-left text-sm pt-[6px] pb-[8px]'>{message.commentReply}</p>
                 </div>
             ))}
             {(comment?.id == readyForReply) && (

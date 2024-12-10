@@ -4,7 +4,7 @@ import CommentCard from './CommentCard';
 import CommentInputSection from './CommonInputSection';
 import { RxExit } from "react-icons/rx";
 
-const CommentSection = ({ filteredAnnotations, handleFilterRecords, handleLikeClick, handleReplyClick, handleEditClick, handleDeleteComment, currentReply, setCurrentReply, addCommentReply, showUsers, users, assignedUser, handleUserChange, getAssignedUser, errors, handleResolveCheck, formatDate, handleCommentChange, setShowUsers, newComment, changeDocument, imageSrc, saveAnnotation, editAbleComment, showInput, updateAnnotation, readyForReply,currentStatus }) => {
+const CommentSection = ({ filteredAnnotations, handleFilterRecords, handleLikeClick, handleReplyClick, handleEditClick, handleDeleteComment, currentReply, setCurrentReply, addCommentReply, showUsers, users, assignedUser, handleUserChange, getAssignedUser, errors, handleResolveCheck, formatDate, handleCommentChange, setShowUsers, newComment, changeDocument, imageSrc, saveAnnotation, editAbleComment, showInput, updateAnnotation, readyForReply,currentStatus,handleReplyLikeClick }) => {
     return (
         <div className='py-8 px-0 w-full lg:max-w-[350px] max-w-[100%] border-[#ccc] border-left-1 overflow-y-auto bg-[#f3f4f6] lg:mt-[0px] mt-[30px] right_side-bar'>
             <h3 className='text-[14px] font-semibold mb-5 text-[#1B1B1B] flex justify-between items-center w-full border-b border-[#ddd] px-[17px] pb-[15px]'> 
@@ -18,6 +18,7 @@ const CommentSection = ({ filteredAnnotations, handleFilterRecords, handleLikeCl
                     handleReplyClick={handleReplyClick} handleEditClick={handleEditClick} handleDeleteComment={handleDeleteComment} currentReply={currentReply}
                     setCurrentReply={setCurrentReply} addCommentReply={addCommentReply} getAssignedUser={getAssignedUser}
                     handleResolveCheck={handleResolveCheck} formatDate={formatDate} readyForReply={readyForReply} key={key}
+                    handleReplyLikeClick= {handleReplyLikeClick}
                 />
             ))}
 

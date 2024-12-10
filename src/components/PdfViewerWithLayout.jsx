@@ -269,7 +269,7 @@ const PdfViewerWithLayout = () => {
                                     </p>` : ''}
                                     <div class="footer_row">
                                         <div class="cooment" data-id="${annotation[0]?.id}" data-key="${key}">
-                                            <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg">
+                                            <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg" style="${item?.like ? 'width:24px;' : 'width:20px;'}">
                                         </div>
                                     </div>
                                 </div>`;
@@ -285,7 +285,7 @@ const PdfViewerWithLayout = () => {
                                             </div>
                                             <p>${annotation?.comment}</p>
                                             <p> 
-                                                <img src="${annotation?.imageUrl}" alt="" style={{ maxWidth: '20%', maxHeight: '20px' }}>
+                                                <img src="${annotation?.imageUrl}" alt="">
                                             </p>
                                             <button class="editComment" value="${annotation?.id}">
                                                 <img src="${EditIcon}" alt="Edit" class="editCommentImg"/>
@@ -295,7 +295,7 @@ const PdfViewerWithLayout = () => {
                                             </button>
                                             <div class="footer_row like_reply_total_container">
                                                 <div class="commentLikeButtonContainer" data-id="${annotation?.id}">
-                                                    <img src="${annotation?.like ? likedIcon : likeIcon}" alt="" class="commentLikeButton">
+                                                    <img src="${annotation?.like ? likedIcon : likeIcon}" alt="" class="commentLikeButton" style="${annotation?.like ? 'width:24px;' : 'width:20px;'}">
                                                 </div>
                                                 <div class="reply">
                                                     <p class="ClickCommentReplyTooltip" data-id="${annotation?.id}">${(annotation?.reply) ? annotation?.reply.length : '0'} reply</p>
@@ -447,6 +447,48 @@ const PdfViewerWithLayout = () => {
         setAnnotations(updatedAnnotations);
     }
 
+    const handleReplyLikeClick = async (commentId,replyKey,liker) => {
+        let liked = liker;
+        if(liked){
+            liked = null;
+        }
+        else{
+            liked = true;
+        }
+        const updatedAnnotations = annotations.map((item) => {
+            if (item.id == commentId) {
+                item.reply = item.reply.map((reply, key) => {
+                    if (key == replyKey) {
+                        return { ...reply, like: liked };
+                    }
+                    return reply;
+                });
+                return item;
+            } else {
+                return item;
+            }
+        });
+
+        const commentReplyImg = document.querySelectorAll('.commentReplyImg');
+        commentReplyImg.forEach(element => {
+                let parent = element.closest('.cooment');
+                if(parent.getAttribute('data-id') == commentId  && parent.getAttribute('data-key') == replyKey){
+                    if(liker){
+                        element.src = likeIcon;
+                        element.style.removeProperty('width');
+                        element.style.width = '20px';
+                        element.classList.remove("liked");
+                    }
+                    else{
+                        element.src = likedIcon;
+                        element.style.removeProperty('width');
+                        element.style.width = '24px';
+                        element.classList.add("liked");
+                    }
+                }
+        });
+        setAnnotations(updatedAnnotations);
+    }
     useEffect(() => {
         addMembers();
 
@@ -488,7 +530,7 @@ const PdfViewerWithLayout = () => {
                                             `<p><img src=" ${item?.imageUrl}" alt=""></p>`: ''}
                                             <div class="footer_row">
                                                 <div class="cooment" data-id="${annotation[0]?.id}" data-key="${key}">
-                                                    <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg">
+                                                    <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg" style="${item?.like ? 'width:24px;' : 'width:20px;'}">
                                                 </div>
                                             </div>
                                         </div>`;
@@ -533,7 +575,7 @@ const PdfViewerWithLayout = () => {
                                     ${(item?.imageUrl) ? `<p> <img src=" ${item?.imageUrl}" alt=""></p>` : ''}
                                     <div class="footer_row">
                                             <div class="cooment" data-id="${annotation[0].id}" data-key="${key}">
-                                            <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg">
+                                            <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg" style="${annotation?.like ? 'width:24px;' : 'width:20px;'}">
                                             </div>
                                     </div>
                                 </div>`;
@@ -568,9 +610,13 @@ const PdfViewerWithLayout = () => {
                 if (event.target.classList.contains('liked')) {
                     event.target.src = likeIcon;
                     event.target.classList.remove("liked");
+                    event.target.style.removeProperty('width');
+                    event.target.style.width = '20px';
                 } else {
                     event.target.src = likedIcon;
                     event.target.classList.add("liked");
+                    event.target.style.removeProperty('width');
+                    event.target.style.width = '24px';
                 }
             } else if (event.target && (event.target.matches('.commentReplyImg'))) {
                 const commentLikeImgContainer = event.target.closest('.cooment');
@@ -579,30 +625,13 @@ const PdfViewerWithLayout = () => {
 
                 let likeStatus = false;
                 if (event.target.classList.contains('liked')) {
-                    event.target.src = likeIcon;
-                    event.target.classList.remove("liked");
-                } else {
-                    event.target.src = likedIcon;
-                    event.target.classList.add("liked");
                     likeStatus = true;
+                } else {
+                    likeStatus = false;
                 }
-
-                const updatedAnnotations = annotations.map((item, mainkey) => {
-                    if (item.id == commentId) {
-                        item.reply = item.reply.map((reply, key) => {
-                            if (key == replyKey) {
-                                return { ...reply, like: likeStatus };
-                            }
-                            return reply;
-                        });
-                        return item;
-                    } else {
-                        return item;
-                    }
-                });
-                setAnnotations(updatedAnnotations);
+                console.log(likeStatus);
+                await handleReplyLikeClick(commentId,replyKey,likeStatus);
             }
-
         };
 
         document.body.addEventListener('click', handleClick);
@@ -624,6 +653,10 @@ const PdfViewerWithLayout = () => {
         };
         startTimer();
 
+        const rightToolBar = document.querySelector('.rpv-toolbar__right');
+        // var newFirstElement; //element which should be first in E
+        // rightToolBar.insertBefore(newFirstElement, rightToolBar.firstChild);
+
         return () => {
             document.body.removeEventListener('click', handleClick);
         }
@@ -643,7 +676,7 @@ const PdfViewerWithLayout = () => {
                 handleUserChange={handleUserChange} getAssignedUser={getAssignedUser} errors={errors} handleResolveCheck={handleResolveCheck}
                 formatDate={formatDate} handleCommentChange={handleCommentChange} setShowUsers={setShowUsers} newComment={newComment} changeDocument={changeDocument}
                 imageSrc={imageSrc} saveAnnotation={saveAnnotation} editAbleComment={editAbleComment} showInput={showInput}
-                updateAnnotation={updateAnnotation} readyForReply={readyForReply} currentStatus={currentStatus}
+                updateAnnotation={updateAnnotation} readyForReply={readyForReply} currentStatus={currentStatus} handleReplyLikeClick = {handleReplyLikeClick}
             />
         </div>
     );

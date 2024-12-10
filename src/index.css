@@ -171,9 +171,9 @@ filter:invert(1) brightness(100%);
   padding: 4px 8px;
   border-radius: 50px;
 }
-.card_main .footer_row img {
+/* .card_main .footer_row img {
   width: 20px;
-}
+} */
 
 .show_hide_div .inner> p {
   font-size: 10px;

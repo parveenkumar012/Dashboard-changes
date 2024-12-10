@@ -7,7 +7,7 @@ import { MdDelete } from "react-icons/md";
 import MessageIcon from "../../assets/message-image.png";
 import { Input } from "@/components/ui/input";
 
-const CommentCard = ({ Key, comment, handleLikeClick, handleReplyClick, handleEditClick, handleDeleteComment, currentReply, setCurrentReply, addCommentReply, getAssignedUser, handleResolveCheck, formatDate, readyForReply }) => {
+const CommentCard = ({ Key, comment, handleLikeClick, handleReplyClick, handleEditClick, handleDeleteComment, currentReply, setCurrentReply, addCommentReply, getAssignedUser, handleResolveCheck, formatDate, readyForReply,handleReplyLikeClick }) => {
     return (
         <div className='px-[17px] mb-3' key={Key}>
             <Card className='custm_card overflow-hidden' >
@@ -49,13 +49,14 @@ const CommentCard = ({ Key, comment, handleLikeClick, handleReplyClick, handleEd
                     <p className='text-left text-sm pt-[30px] pb-[40px]'>{comment?.comment}</p>
                     <FileAttachment imageUrl={comment?.imageUrl} />
                     <div className='flex gap-2 mt-2'>
-                        <FaEdit onClick={() => handleEditClick(comment?.id)} className='cursor-pointer' />
-                        <MdDelete onClick={() => handleDeleteComment(comment?.id)} className='cursor-pointer' />
+                        <FaEdit onClick={() => handleEditClick(comment?.id)} className='cursor-pointer text-[20px]' />
+                        <MdDelete onClick={() => handleDeleteComment(comment?.id)} className='cursor-pointer text-[20px]' />
                     </div>
                 </CardContent>
                 <ReplySection
                     comment={comment} handleReplyClick={handleReplyClick} currentReply={currentReply} setCurrentReply={setCurrentReply}
                     addCommentReply={addCommentReply} readyForReply={readyForReply} handleLikeClick={handleLikeClick}
+                    handleReplyLikeClick={handleReplyLikeClick} formatDate={formatDate}
                 />
             </Card>
         </div>
