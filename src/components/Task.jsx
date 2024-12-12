@@ -74,7 +74,7 @@ export function TaskCard({ status = "PENDING", startDate = "Mar 30", endDate = "
                 </TooltipDemo>
               </Badge>
               <Badge className="cursor-pointer text-x text-[10px] hover:bg-[#1B1B1B] hover:text-white  text-[#667085] px-[5px] py-[1px] rounded-[5px] bg-[#F6F6F6]">
-                <Dropdown content="done" position="bottom"> 2 More </Dropdown>
+                <Dropdown content="done" position="bottom" number={1}> 2 More </Dropdown>
               </Badge>
             </div>
           </div>

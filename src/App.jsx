@@ -11,7 +11,7 @@ function App() {
         <Route path="/dash" element={<Dashboard />} />
         <Route path="/supplier-onboarding" element={<SupplierOnBoard />} />
         <Route path="/" element={<PdfViewerWithLayout />} />
-        <Route path="list-view" element={<ListView />} />
+        <Route path="/list-view" element={<ListView />} />
 
       </Route>
     ),

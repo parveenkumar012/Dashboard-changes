@@ -309,3 +309,60 @@ img.DeleteCommentImg{max-width: 15px;max-height: 20px;}
 .custom-tooltip .card_main p img {
   max-width: 110px;
 }
+
+.custom_message_container .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  margin-top: 70px;
+}
+
+.custom_message_container:hover .tooltiptext {
+  visibility: visible;
+}
+.rpv-default-layout__toolbar {
+  z-index: 999 !important;
+}
+
+/* Dec 11 */
+.custom_message_container {
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.custom_message_container img {
+  width: 20px;
+}
+
+/* .custom_message_container.move img {
+	filter: drop-shadow(2px 2px 3px #0000f7);
+} */
+
+.grid-view:hover img , .list-view:hover img {
+  filter: brightness(0) saturate(100%) invert(37%) sepia(86%) saturate(7072%) hue-rotate(242deg) brightness(96%) contrast(87%);
+}
+
+.left-head {
+  border-top-left-radius: 10px;
+}
+
+.right-head {
+  border-top-right-radius: 10px;
+}
+.Active{
+  border-color:#4F46E5 !important;
+  }
+  
+  .Active img {
+    filter: brightness(0) saturate(100%) invert(37%) sepia(86%) saturate(7072%) hue-rotate(242deg) brightness(96%) contrast(87%);
+  }

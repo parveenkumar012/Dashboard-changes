@@ -6,11 +6,12 @@ import { FaEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import MessageIcon from "../../assets/message-image.png";
 import { Input } from "@/components/ui/input";
+import Dropdown from '../Dropdown';
 
-const CommentCard = ({ Key, comment, handleLikeClick, handleReplyClick, handleEditClick, handleDeleteComment, currentReply, setCurrentReply, addCommentReply, getAssignedUser, handleResolveCheck, formatDate, readyForReply,handleReplyLikeClick }) => {
+const CommentCard = ({ Key, comment, handleLikeClick, handleReplyClick, handleEditClick, handleDeleteComment, currentReply, setCurrentReply, addCommentReply, getAssignedUser, handleResolveCheck, formatDate, readyForReply,handleReplyLikeClick,readyForPreview}) => {
     return (
         <div className='px-[17px] mb-3' key={Key}>
-            <Card className='custm_card overflow-hidden' >
+            <Card className={`custm_card overflow-hidden ${readyForPreview==comment?.id ? 'border-t border-b shadow-[0_0px_10px_0px_#ecbd69]':''}`}>
                 {comment?.assignedUser && (
                     <CardHeader className='p-[6px_8px]'>
                         <div className='flex items-center justify-between w-full'>
@@ -42,16 +43,12 @@ const CommentCard = ({ Key, comment, handleLikeClick, handleReplyClick, handleEd
                         <div className='flex gap-2 mt-0'>
                             <div className='flex items-center text-[12px]'>
                                 <span className='text-[12px] text-[#1b1b1b] opacity-50 m-1'>{formatDate(comment?.timestamp)}</span>
-                                <p><BsThreeDotsVertical /></p>
+                                <Dropdown content="done" position="bottom" number={2} id={comment?.id} handleEditClick={handleEditClick} handleDeleteComment={handleDeleteComment}> <BsThreeDotsVertical /></Dropdown>
                             </div>
                         </div>
                     </div>
                     <p className='text-left text-sm pt-[30px] pb-[40px]'>{comment?.comment}</p>
                     <FileAttachment imageUrl={comment?.imageUrl} />
-                    <div className='flex gap-2 mt-2'>
-                        <FaEdit onClick={() => handleEditClick(comment?.id)} className='cursor-pointer text-[20px]' />
-                        <MdDelete onClick={() => handleDeleteComment(comment?.id)} className='cursor-pointer text-[20px]' />
-                    </div>
                 </CardContent>
                 <ReplySection
                     comment={comment} handleReplyClick={handleReplyClick} currentReply={currentReply} setCurrentReply={setCurrentReply}

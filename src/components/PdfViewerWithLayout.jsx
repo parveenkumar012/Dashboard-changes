@@ -13,16 +13,20 @@ import DeleteIcon from "../assets/delete.png";
 import EditIcon from "../assets/edit_button.png";
 import MessageIcon from "../assets/message-image.png";
 import CommentSection from './pdfViewer/CommentSection';
+import msgIcon from '../assets/message_before.png';
+import msgInIcon from '../assets/message_after.png';
 
 const PdfViewerWithLayout = () => {
     const defaultLayout = defaultLayoutPlugin();
+    const [messageStatus, setMessageStatus] = useState(null);
     const [annotations, setAnnotations] = useState([]); // Store annotations (positions and comments of all)
     const [newComment, setNewComment] = useState(''); // Store the current comment input
     const [showInput, setShowInput] = useState(false); // Control visibility of the comment input box
     const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 }); // Store the click position in PDF
     const [pdfUrl, setPdfUrl] = useState(test_pdf); // Path to the PDF file
-    const [scale, setScale] = useState({scale: 1}); // To store and track the PDF scale factor
+    const [scale, setScale] = useState({ scale: 1 }); // To store and track the PDF scale factor
     const [readyForReply, setReadyForReply] = useState(null); // Text of the current comment
+    const [readyForPreview, setreadyForPreview] = useState(null); // Text of the current comment
     const [currentReply, setCurrentReply] = useState(""); // Text of the current comment
     const [currentPageIndex, setCurrentPageIndex] = useState(0); //Clicked page index
     const [initialPage, setInitialPage] = useState(0); //Page on screen after pdf load
@@ -35,6 +39,17 @@ const PdfViewerWithLayout = () => {
     const [imageSrc, setImageSrc] = useState(null); //set the image url when user select the image
     let [count, setCount] = useState(0); // count comments
     const addingCommentEventRef = useRef(false); //verify that currently user want to add or edit the comment 
+    const attachedDragRefs = useRef(new Set()); // Keep track of elements with listeners attached
+
+    const handleChooseMessageClick = (val) => {
+        setMessageStatus(val);
+        if (!val) {
+            //remove if icon is available
+            if (document.querySelector('.pdf_message_icon_container')) {
+                document.querySelector('.pdf_message_icon_container').remove();
+            }
+        }
+    }
 
     const handlePdfClick = (e) => {
         const pdfCanvas = e.target.closest('.rpv-core__text-layer');
@@ -45,22 +60,36 @@ const PdfViewerWithLayout = () => {
             tooltips.forEach(tooltip => {
                 tooltip.style.display = 'none';
             });
+            if (messageStatus) {
 
-            const container = pdfCanvas.getBoundingClientRect();
-            const testId = pdfCanvas.getAttribute('data-testid');
-            const pageNumber = testId.split('-')[2];
+                const container = pdfCanvas.getBoundingClientRect();
+                const testId = pdfCanvas.getAttribute('data-testid');
+                const pageNumber = testId.split('-')[2];
 
-            const x = e.clientX - container.left;
-            const y = e.clientY - container.top;
+                const x = e.clientX - container.left;
+                const y = e.clientY - container.top;
 
-            // Apply the scale factor to adjust the coordinates
-            const scaledX = x / scale.scale;
-            const scaledY = y / scale.scale;
-            
-            // Set position for the input box to appear at clicked position
-            setClickPosition({ x: scaledX, y: scaledY });
-            setShowInput(true); // Show the comment input box
-            setCurrentPageIndex(pageNumber);
+                // Apply the scale factor to adjust the coordinates
+                const scaledX = x / scale.scale;
+                const scaledY = y / scale.scale;
+
+                // Set position for the input box to appear at clicked position
+                setClickPosition({ x: scaledX, y: scaledY });
+                setShowInput(true); // Show the comment input box
+                setCurrentPageIndex(pageNumber);
+
+                //set message icon into the pdf
+                const annotation_layer = pdfCanvas.nextElementSibling;
+                const tempMessageIcon = `<div style="height: 22px; left: ${scaledX + 24}px; top: ${scaledY + 7}px; transform: matrix(1, 0, 0, 1, -33.8027, -33.7217); transform-origin: -${scaledX + 24}px -${scaledY + 7}px 0px; width: 22px;" class="rpv-core__annotation rpv-core__annotation--text pdf_message_icon_container" data-annotation-id="annot_p0_2"><img src="${MessageIcon}" alt="pin" class="temporary_msg_icon"></div>`;
+
+                //firstly remove if any other icon is available
+                if (document.querySelector('.pdf_message_icon_container')) {
+                    document.querySelector('.pdf_message_icon_container').remove();
+                }
+
+                //and new message icon into the pdf
+                annotation_layer.insertAdjacentHTML('afterbegin', tempMessageIcon);
+            }
         }
     };
 
@@ -99,14 +128,14 @@ const PdfViewerWithLayout = () => {
             setErrors({ ...errors, commentErr: '' })
             addingCommentEventRef.current = true;
             if (showInput) {
-                await saveAnnotationsToPdf(updatedAnnotations, 1);
+                await saveAnnotationsToPdf(updatedAnnotations, 1 , null);
             }
         } else {
             setErrors({ ...errors, commentErr: 'Please add comment first' })
         }
     };
 
-    const saveAnnotationsToPdf = async (annotations, check) => {
+    const saveAnnotationsToPdf = async (annotations, check , pageNo) => {
         let url = (check == 0) ? test_pdf : pdfUrl;
         const pdfBytes = await fetch(url).then((res) => res.arrayBuffer());
         const pdfDoc = await PDFDocument.load(pdfBytes);
@@ -125,8 +154,9 @@ const PdfViewerWithLayout = () => {
                 const popupAnnotation = PDFDict.withContext(pdfDoc.context);
                 popupAnnotation.set(PDFName.of('Type'), PDFName.of('Annot'));
                 popupAnnotation.set(PDFName.of('Subtype'), PDFName.of('Text')); // Tooltip subtype
+
                 popupAnnotation.set(PDFName.of('Rect'), pdfDoc.context.obj([
-                    scaledX, scaledY, scaledX + logoDims.width, scaledY + logoDims.height
+                    scaledX + 20, scaledY - logoDims.height, scaledX + 20, scaledY - logoDims.height
                 ]));
                 popupAnnotation.set(PDFName.of('Contents'), PDFString.of(`${annotation.timestamp}\n${annotation.comment}`)); // Tooltip text with timestamp
                 popupAnnotation.set(PDFName.of('Name'), PDFName.of('Comment')); // Annotation name
@@ -145,7 +175,8 @@ const PdfViewerWithLayout = () => {
         setPdfUrl(modifiedPdfUrl);
 
         //set page index
-        setInitialPage(currentPageIndex);
+        const currentPage = pageNo ? pageNo : currentPageIndex;
+        setInitialPage(currentPage);
         setCurrentPageIndex(0);
     };
 
@@ -257,14 +288,14 @@ const PdfViewerWithLayout = () => {
 
                 let AllReplys = '';
                 annotation?.reply?.forEach((item, key) => {
-                    AllReplys+= `<div class="inner mt-1">
+                    AllReplys += `<div class="inner mt-1">
                                     <div class="top_row">
                                         <h3><span>UT</span>User Test</h3>
                                         <p>${formatDate(item?.date)}</p>
                                     </div>
                                     <p>${item?.commentReply}</p>
                                     ${(item?.imageUrl) ?
-                                    `<p>
+                            `<p>
                                         <img src=" ${item?.imageUrl}" alt="">
                                     </p>` : ''}
                                     <div class="footer_row">
@@ -325,7 +356,7 @@ const PdfViewerWithLayout = () => {
                                     </div>
                                 </div>`;
 
-                annotationCon.innerHTML =  `<div class="msgIconContainer" data-id="${annotation?.id}" data-status="${annotation?.status}">
+                annotationCon.innerHTML = `<div class="msgIconContainer" data-id="${annotation?.id}" data-status="${annotation?.status}">
                                                 <span class="messageText" data-id="${annotation?.id}">${annotationNumber}</span>
                                                 <img src="${MessageIcon}" class="message_icon" alt="Message" data-id="${annotation?.id}" />
                                             </div>${tooltip}`;
@@ -372,7 +403,7 @@ const PdfViewerWithLayout = () => {
             .filter(annotation => annotation.id != id);
 
         setAnnotations(filteredAnnotations);
-        await saveAnnotationsToPdf(filteredAnnotations, 0);
+        await saveAnnotationsToPdf(filteredAnnotations, 0,null);
     }
 
     const handleEditClick = async (id) => {
@@ -392,7 +423,7 @@ const PdfViewerWithLayout = () => {
 
             addingCommentEventRef.current = true;
             setAnnotations(updatedAnnotations);
-            await saveAnnotationsToPdf(updatedAnnotations, 1);
+            await saveAnnotationsToPdf(updatedAnnotations, 1 , null);
 
             setNewComment(''); // Clear the input after saving
             setShowInput(false); // Hide the input box
@@ -404,9 +435,24 @@ const PdfViewerWithLayout = () => {
             setErrors({ ...errors, commentErr: 'Please add comment first' })
         }
     }
+    
+    const updateAnnotationLocation = async (commentId,page_number,scaledX,scaledY) => {
+
+        console.log(commentId,page_number,scaledX,scaledY);
+
+        const updatedAnnotations = annotations.map((item, key) => {
+            if (item.id == commentId) {
+                return { ...item, x: scaledX, y: scaledY, pageIndex:page_number, added:null};
+            }
+            return {...item,added:null};
+        });
+
+        addingCommentEventRef.current = true;
+        saveAnnotationsToPdf(updatedAnnotations,0,page_number);
+    }
 
     const handleFilterRecords = async (value) => {
-        
+
         let num = value;
         if (num == 0) {
             setCurrentStatus(null);
@@ -447,12 +493,12 @@ const PdfViewerWithLayout = () => {
         setAnnotations(updatedAnnotations);
     }
 
-    const handleReplyLikeClick = async (commentId,replyKey,liker) => {
+    const handleReplyLikeClick = async (commentId, replyKey, liker) => {
         let liked = liker;
-        if(liked){
+        if (liked) {
             liked = null;
         }
-        else{
+        else {
             liked = true;
         }
         const updatedAnnotations = annotations.map((item) => {
@@ -471,31 +517,42 @@ const PdfViewerWithLayout = () => {
 
         const commentReplyImg = document.querySelectorAll('.commentReplyImg');
         commentReplyImg.forEach(element => {
-                let parent = element.closest('.cooment');
-                if(parent.getAttribute('data-id') == commentId  && parent.getAttribute('data-key') == replyKey){
-                    if(liker){
-                        element.src = likeIcon;
-                        element.style.removeProperty('width');
-                        element.style.width = '20px';
-                        element.classList.remove("liked");
-                    }
-                    else{
-                        element.src = likedIcon;
-                        element.style.removeProperty('width');
-                        element.style.width = '24px';
-                        element.classList.add("liked");
-                    }
+            let parent = element.closest('.cooment');
+            if (parent.getAttribute('data-id') == commentId && parent.getAttribute('data-key') == replyKey) {
+                if (liker) {
+                    element.src = likeIcon;
+                    element.style.removeProperty('width');
+                    element.style.width = '20px';
+                    element.classList.remove("liked");
                 }
+                else {
+                    element.src = likedIcon;
+                    element.style.removeProperty('width');
+                    element.style.width = '24px';
+                    element.classList.add("liked");
+                }
+            }
         });
         setAnnotations(updatedAnnotations);
     }
+
+    const messageIconForToolBar = ()=>{
+        let status  = messageStatus ? 'move':'not_move';
+        return `<div class="custom_message_container ${status}"><img src="${(messageStatus)?msgInIcon:msgIcon}" alt="icon" class="custom_message_icon"><span class="tooltiptext">Add Comment</span></div>`;
+    }
+
+    const handleMessageIconClick = (id) => {
+        setreadyForPreview(id);
+    }
+
     useEffect(() => {
         addMembers();
 
         const handleClick = async (event) => {
+
             if (event.target && (event.target.matches('.message_icon') || event.target.matches('.messageText'))) {
                 const dataId = event.target.dataset.id;
-                setReadyForReply(dataId);
+                handleMessageIconClick(dataId);
 
                 //firstly close all others tooltips 
                 const tooltips = document.querySelectorAll('.custom-tooltip');
@@ -520,14 +577,14 @@ const PdfViewerWithLayout = () => {
                         const annotation = annotations.filter(annotation => annotation.id == event.target.value);
                         let AllReplys = '';
                         annotation[0].reply.forEach((item, key) => {
-                            AllReplys+= `<div class="inner mt-1">
+                            AllReplys += `<div class="inner mt-1">
                                             <div class="top_row">
                                                 <h3><span>UT</span>User Test</h3>
                                                 <p>${formatDate(item?.date)}</p>
                                             </div>
                                             <p>${item?.commentReply}</p>
                                             ${(item?.imageUrl) ?
-                                            `<p><img src=" ${item?.imageUrl}" alt=""></p>`: ''}
+                                    `<p><img src=" ${item?.imageUrl}" alt=""></p>` : ''}
                                             <div class="footer_row">
                                                 <div class="cooment" data-id="${annotation[0]?.id}" data-key="${key}">
                                                     <img src="${item?.like ? likedIcon : likeIcon}" alt="" class="commentReplyImg" style="${item?.like ? 'width:24px;' : 'width:20px;'}">
@@ -566,7 +623,7 @@ const PdfViewerWithLayout = () => {
 
                 let AllReplys = '';
                 annotation[0].reply.forEach((item, key) => {
-                    AllReplys+= `<div class="inner mt-1">
+                    AllReplys += `<div class="inner mt-1">
                                     <div class="top_row">
                                         <h3><span>UT</span>User Test</h3>
                                         <p>${formatDate(item?.date)}</p>
@@ -602,7 +659,7 @@ const PdfViewerWithLayout = () => {
                         e.target.value = null
                     }
                 });
-            } else if(event.target && (event.target.matches('.commentLikeButton'))) {
+            } else if (event.target && (event.target.matches('.commentLikeButton'))) {
                 const commentLikeButtonContainer = event.target.closest('.commentLikeButtonContainer');
                 const commentId = commentLikeButtonContainer.getAttribute('data-id')
 
@@ -630,11 +687,115 @@ const PdfViewerWithLayout = () => {
                     likeStatus = false;
                 }
                 console.log(likeStatus);
-                await handleReplyLikeClick(commentId,replyKey,likeStatus);
+                await handleReplyLikeClick(commentId, replyKey, likeStatus);
+            } else if (event.target && (event.target.matches('.custom_message_icon'))) {
+                let message_status = false;
+                console.log(event.target.closest('.custom_message_container').classList.contains('not_move'));
+                if (event.target.closest('.custom_message_container').classList.contains('not_move')) {
+                    message_status = true;
+                    event.target.closest('.custom_message_container').classList.remove("not_move");
+                    event.target.closest('.custom_message_container').classList.add("move");
+                    event.target.src= msgInIcon;
+                }
+                else {
+                    message_status = false;
+                    event.target.closest('.custom_message_container').classList.remove("move");
+                    event.target.closest('.custom_message_container').classList.add("not_move");
+                    event.target.src= msgIcon;
+                }
+                handleChooseMessageClick(message_status);
             }
         };
 
+        const handleHover = async (e) => {
+            if(e.target && (e.target.matches('.message_icon'))){
+                const dataId = e.target.dataset.id;
+                handleMessageIconClick(dataId);
+
+                const dragItem = e.target;
+                if (dragItem && !attachedDragRefs.current.has(dragItem)) {
+                    // Add to the tracked set to prevent duplicate listeners
+                    attachedDragRefs.current.add(dragItem);
+                    const targets = document.querySelectorAll('.rpv-core__text-layer');
+
+                      // Drag over - Allow dropping
+                    targets.forEach((target) => {
+
+                        // Must be called to allow drop
+                        target.addEventListener('dragover', (event) => {
+                            event.preventDefault(); 
+                        });
+
+                        // Drop
+                        target.addEventListener('drop',  async(event) => {
+                            event.preventDefault();
+                            const commentId = dragItem.getAttribute('data-id');
+                            const pdfCanvas = event.target;
+                             if (pdfCanvas) {
+                                const pdfContainer = pdfCanvas.getBoundingClientRect();
+                                const test_id = pdfCanvas.getAttribute('data-testid');
+                                const page_number = test_id.split('-')[2];
+                           
+                                const xAxis = event.clientX - pdfContainer.left;
+                                const yAxis = event.clientY - pdfContainer.top;
+        
+                                // Apply the scale factor to adjust the coordinates
+                                const scaledXaxis = xAxis / scale.scale;
+                                const scaledYaxis = yAxis / scale.scale;
+
+                                await updateAnnotationLocation(commentId,page_number, scaledXaxis, scaledYaxis);
+                            }
+                        });
+                    });
+
+    
+                    // Add dragend listener
+                    // dragItem.addEventListener('dragend', async (event) => {
+
+                        // const commentId = event.target.getAttribute('data-id');
+                        // const annotation_layer = event.target.closest('.rpv-core__annotation-layer');
+                        // const pdfCanvas = annotation_layer.previousElementSibling;
+
+                        // if (pdfCanvas) {
+                        //     const pdfContainer = pdfCanvas.getBoundingClientRect();
+                        //     const test_id = pdfCanvas.getAttribute('data-testid');
+                        //     const page_number = test_id.split('-')[2];
+                        //     const xAxis = event.clientX - pdfContainer.left;
+                        //     const yAxis = event.clientY - pdfContainer.top;
+    
+                        //     // Apply the scale factor to adjust the coordinates
+                        //     const scaledXaxis = xAxis / scale.scale;
+                        //     const scaledYaxis = yAxis / scale.scale;
+                        //     await updateAnnotationLocation(commentId,page_number, scaledXaxis, scaledYaxis);
+                        // }
+                    // });
+
+
+                }
+            }
+        }
+
+        //add events
         document.body.addEventListener('click', handleClick);
+        document.body.addEventListener('mouseover',handleHover);
+
+        // Use setTimeout to delay the check until after the render
+        setTimeout(() => {
+            if (document.querySelector('.rpv-toolbar__right')) {
+                const right_toolbar = document.querySelector('.rpv-toolbar__right');
+                if (right_toolbar.querySelector('.custom_message_container')) {
+                    return;
+                }
+                let customMessageButton = messageIconForToolBar();
+
+                if(!messageStatus){
+                    setMessageStatus(null);
+                }
+                right_toolbar.insertAdjacentHTML('afterbegin', customMessageButton);
+            }
+    
+        }, 500);
+
         let callCount = 0; // Keep track of how many times the function has been called
         // Call the function to add tooltips after the PDF is loaded
         const startTimer = () => {
@@ -653,13 +814,11 @@ const PdfViewerWithLayout = () => {
         };
         startTimer();
 
-        const rightToolBar = document.querySelector('.rpv-toolbar__right');
-        // var newFirstElement; //element which should be first in E
-        // rightToolBar.insertBefore(newFirstElement, rightToolBar.firstChild);
-
         return () => {
             document.body.removeEventListener('click', handleClick);
+            document.body.removeEventListener('mouseover',handleHover);
         }
+
     }, [pdfUrl, currentStatus]);
 
     return (
@@ -676,7 +835,8 @@ const PdfViewerWithLayout = () => {
                 handleUserChange={handleUserChange} getAssignedUser={getAssignedUser} errors={errors} handleResolveCheck={handleResolveCheck}
                 formatDate={formatDate} handleCommentChange={handleCommentChange} setShowUsers={setShowUsers} newComment={newComment} changeDocument={changeDocument}
                 imageSrc={imageSrc} saveAnnotation={saveAnnotation} editAbleComment={editAbleComment} showInput={showInput}
-                updateAnnotation={updateAnnotation} readyForReply={readyForReply} currentStatus={currentStatus} handleReplyLikeClick = {handleReplyLikeClick}
+                updateAnnotation={updateAnnotation} readyForReply={readyForReply} currentStatus={currentStatus} handleReplyLikeClick={handleReplyLikeClick}
+                readyForPreview ={readyForPreview}
             />
         </div>
     );

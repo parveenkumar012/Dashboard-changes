@@ -22,7 +22,7 @@ const ReplySection = ({ comment, handleReplyClick, currentReply, setCurrentReply
                     <div className=" pl-5 border-l border-l-[#444]">
                         <div className='flex gap-2 pt-4 mb-1 w-full'>
                             <div className='flex items-center gap-2 w-full'>
-                                <div class="text-[10px] top_row flex items-center justify-between w-full">
+                                <div className="text-[10px] top_row flex items-center justify-between w-full">
                                     <h3 className="flex text-[10px] items-center gap-1" ><span className="w-[25px] h-[25px] bg-[#0000ff85] flex justify-center items-center rounded-full text-white text-[10px]">UT</span>User Test</h3>
                                     <p>{formatDate(message?.date)}</p>
                                 </div>

@@ -45,7 +45,7 @@ const CommentInputSection = ({ showUsers, setShowUsers, users, assignedUser, han
                                 <Input className='absolute top-0 left-0 w-full opacity-0 cursor-pointer z-10' type="file" id="myFile" name="filename" onChange={changeDocument} accept="image/*" />
                             </div>
                             {imageSrc && <img src={imageSrc} alt="Uploaded" className='max-w-5 max-h-5' />}
-                            {(editAbleComment && !showInput) && (
+                            {(editAbleComment) && (
                                 <Button type='button' className='mt-0 bg-[#0000ff85] text-[12px]' onClick={updateAnnotation}>Edit Comment</Button>
                             )}
                             {!editAbleComment && (
