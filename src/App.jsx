@@ -3,7 +3,7 @@ import Dashboard from './Dashboard';
 import SupplierOnBoard from './supplier/onboard.jsx';
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from "react-router-dom";
 import PdfViewerWithLayout from './components/PdfViewerWithLayout';
-
+import ListView from './components/listView/index';
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -11,6 +11,8 @@ function App() {
         <Route path="/dash" element={<Dashboard />} />
         <Route path="/supplier-onboarding" element={<SupplierOnBoard />} />
         <Route path="/" element={<PdfViewerWithLayout />} />
+        <Route path="list-view" element={<ListView />} />
+
       </Route>
     ),
     {
